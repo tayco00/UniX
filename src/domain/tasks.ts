@@ -5,6 +5,7 @@ export const taskTypeLabels: Record<TaskType, string> = {
   assignment: "Abgabe",
   study: "Lernblock",
   admin: "Organisation",
+  dining: "Mensa/Cafétaria",
 };
 
 export const priorityLabels: Record<Priority, string> = {

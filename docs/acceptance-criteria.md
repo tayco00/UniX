@@ -30,12 +30,12 @@ Legende: ✅ durch ausgeführte Tests oder konkrete Laufzeitprüfung belegt; �
 | F-03 | ✅ | Das Semester bleibt optional. | Ersteinrichtung in App- und Desktop-Test |
 | F-04 | ✅ | Neue Nutzer starten ohne ungefragte Beispielaufgaben. | App-Integrationstest + Desktop-Test |
 | F-05 | ✅ | Die Heute-Ansicht begrüßt mit dem Vornamen. | App-Integrationstest |
-| F-06 | ✅ | Eine Aufgabe kann mit Titel, Bereich, Art, Datum, Aufwand, Priorität und Notiz angelegt werden. | App-Integrationstest / TaskEditor |
+| F-06 | ✅ | Eine Aufgabe kann mit Titel, Bereich, Art (einschließlich Mensa/Cafétaria), Datum, Aufwand, Priorität und Notiz angelegt werden. | App-Integrationstest / TaskEditor |
 | F-07 | ✅ | Bearbeiten erhält ID, Erledigungszustand, Notiz und frei gewählten gültigen Aufwand. | App-Integrationstest |
 | F-08 | ✅ | Eine offene Aufgabe kann erledigt und eine erledigte wieder geöffnet werden. | App-Test + nativer Desktop-Ablauf |
 | F-09 | ✅ | Löschen verlangt eine Bestätigung; Abbrechen erhält die Aufgabe. | App-Integrationstest |
 | F-10 | ✅ | Aufgaben können nach offen, erledigt und alle gefiltert werden. | App-Integrationstest |
-| F-11 | ✅ | Die Suche berücksichtigt Titel, Modul und Notiz aller Aufgaben, auch außerhalb der sichtbaren Seite. | App-Integrationstest / SemesterMate |
+| F-11 | ✅ | Die Suche berücksichtigt Titel, Modul und Notiz aller Aufgaben, auch außerhalb der sichtbaren Seite. | App-Integrationstest / Aufgabenansicht |
 | F-12 | ✅ | Profil, Theme, Export, Import und Reset sind erreichbar und Fehler werden verständlich gemeldet. | App-Integrationstests + nativer Desktop-Ablauf |
 
 ## UX (UX)

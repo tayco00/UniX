@@ -82,7 +82,7 @@ export function isValidData(value) {
       isString(task.title, 140) &&
       task.title.trim().length > 0 &&
       isString(task.module, 100) &&
-      ["exam", "assignment", "study", "admin"].includes(task.type) &&
+      ["exam", "assignment", "study", "admin", "dining"].includes(task.type) &&
       isCalendarDate(task.dueDate) &&
       Number.isInteger(task.estimateMinutes) &&
       task.estimateMinutes >= 0 &&

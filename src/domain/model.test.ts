@@ -1,7 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { appDataSchema, emptyAppData, taskSchema } from "./model";
+import {
+  appDataSchema,
+  emptyAppData,
+  taskSchema,
+  taskTypeSchema,
+} from "./model";
 
 describe("data contracts", () => {
+  it("accepts dining and all existing task types but rejects unknown types", () => {
+    for (const type of ["exam", "assignment", "study", "admin", "dining"]) {
+      expect(taskTypeSchema.parse(type)).toBe(type);
+    }
+    expect(() => taskTypeSchema.parse("unknown")).toThrow();
+  });
   it("accepts the canonical empty state", () =>
     expect(appDataSchema.parse(emptyAppData()).version).toBe(1));
   it("rejects unknown data versions", () =>

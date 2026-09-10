@@ -131,11 +131,7 @@ export function TaskEditor({
           onChange={(event) =>
             update({ ...draft, estimateMinutes: event.target.valueAsNumber })
           }
-          aria-describedby="estimate-hint"
         />
-        <small id="estimate-hint">
-          0 = noch nicht geschätzt · bis 1.440 Min.
-        </small>
       </div>
       <fieldset className="field field-wide priority-field">
         <legend>Priorität</legend>
@@ -155,7 +151,7 @@ export function TaskEditor({
       </fieldset>
       <label className="field field-wide">
         <span>
-          Notiz <small>optional</small>
+          Notiz <small>(optional)</small>
         </span>
         <textarea
           maxLength={2000}

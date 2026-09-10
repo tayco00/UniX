@@ -58,7 +58,7 @@ beforeEach(() => {
     exportBackup: vi.fn(async () => ({ canceled: true })),
     importBackup: vi.fn(async () => ({ canceled: true })),
     getAppInfo: vi.fn(async () => ({
-      version: "0.2.0",
+      version: "0.2.1",
       dataPath: "C:\\Test\\UniX",
       platform: "win32",
     })),
@@ -90,9 +90,44 @@ async function settings() {
 }
 
 describe("UniX user journeys", () => {
+  it("offers Mensa/Cafétaria, persists it after restart and keeps the requested labels", async () => {
+    const user = await openEditor();
+    expect(
+      screen.getByRole("option", { name: "Mensa/Cafétaria" }),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Notiz (optional)")).toBeInTheDocument();
+    expect(screen.getByLabelText("Aufwand in Minuten")).not.toHaveAttribute(
+      "aria-describedby",
+    );
+    expect(
+      screen.queryByText(/0 = noch nicht geschätzt/),
+    ).not.toBeInTheDocument();
+    expect(document.body.textContent).not.toContain("SemesterMate");
+    await user.type(screen.getByLabelText("Aufgabe"), "Mittagspause");
+    await user.selectOptions(screen.getByLabelText("Art"), "dining");
+    await user.click(screen.getByRole("button", { name: "Aufgabe anlegen" }));
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument(),
+    );
+    expect(stored.tasks[0].type).toBe("dining");
+    cleanup();
+    const restarted = await mount();
+    await restarted.click(
+      await screen.findByRole("button", { name: "Mittagspause bearbeiten" }),
+    );
+    expect(screen.getByLabelText("Art")).toHaveValue("dining");
+    await restarted.click(screen.getByRole("button", { name: "Abbrechen" }));
+    await restarted.click(
+      screen.getByRole("button", { name: "Einstellungen" }),
+    );
+    expect(
+      screen.getByRole("heading", { level: 1, name: "UniX" }),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText("Semester (optional)")).toBeInTheDocument();
+  });
   it("tells the user when an automatic recovery may have lost the latest change", async () => {
     vi.mocked(window.unixApi!.getAppInfo).mockResolvedValue({
-      version: "0.2.0",
+      version: "0.2.1",
       dataPath: "test",
       platform: "win32",
       recoveredFromBackup: true,
@@ -108,6 +143,7 @@ describe("UniX user journeys", () => {
     stored = emptyAppData();
     const user = await mount();
     await user.type(await screen.findByLabelText("Vorname"), "Alex");
+    expect(screen.getByLabelText("Semester (optional)")).toBeInTheDocument();
     await user.type(screen.getByLabelText("Hochschule"), "HTW Dresden");
     await user.type(
       screen.getByLabelText("Studiengang"),
@@ -198,7 +234,7 @@ describe("UniX user journeys", () => {
       await screen.findByRole("button", { name: "Essay abgeben erledigen" }),
     );
     expect(await screen.findByText("Alles erledigt.")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "SemesterMate" }));
+    await user.click(screen.getByRole("button", { name: "Aufgaben" }));
     await user.click(screen.getByRole("button", { name: /^Erledigt/ }));
     expect(document.querySelector(".task-row")).not.toHaveTextContent(
       "überfällig",
@@ -216,9 +252,7 @@ describe("UniX user journeys", () => {
   it("edits arbitrary supported durations without changing status or identity", async () => {
     stored = ready([{ ...task, status: "done" }]);
     const user = await mount();
-    await user.click(
-      await screen.findByRole("button", { name: "SemesterMate" }),
-    );
+    await user.click(await screen.findByRole("button", { name: "Aufgaben" }));
     await user.click(screen.getByRole("button", { name: /^Erledigt/ }));
     await user.click(screen.getByRole("button", { name: "Essay abgeben" }));
     expect(screen.getByLabelText("Aufwand in Minuten")).toHaveValue(20);
@@ -453,9 +487,7 @@ describe("UniX user journeys", () => {
       })),
     );
     const user = await mount();
-    await user.click(
-      await screen.findByRole("button", { name: "SemesterMate" }),
-    );
+    await user.click(await screen.findByRole("button", { name: "Aufgaben" }));
     expect(document.querySelectorAll(".task-row")).toHaveLength(50);
     await user.click(
       screen.getByRole("button", { name: "Weitere 50 anzeigen" }),

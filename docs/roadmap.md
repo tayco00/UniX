@@ -7,7 +7,7 @@
 - 108 interne Abnahmekriterien
 - Designsystem, Datenvertrag, Desktop-Brücke, Tests und Packaging
 
-## M1 — SemesterMate MVP (jetzt lauffähig)
+## M1 — Aufgabenverwaltung (jetzt lauffähig)
 
 - Ersteinrichtung ohne Konto
 - Persönliche Heute-Ansicht
@@ -30,6 +30,12 @@ Exit: 10–15 Studierende verwenden UniX vier Wochen; mindestens 50 % öffnen es
 
 Vor breitem Rollout weiter offen: Installer/Upgrade/Deinstallation auf einem frischen zweiten Windows-Gerät, Code Signing, Screenreader-/Hochkontrastprüfung, reale Pilotnutzung. Die funktionale MVP-Prüfung ersetzt diese Freigaben nicht.
 
+## M1.2 — Beschriftungen und Aufgabenart (0.2.1)
+
+- „Mensa/Cafétaria“ als zusätzliche Aufgabenart, einschließlich Speichern, Bearbeiten und Sicherungen
+- Einheitliche Feldhinweise „(optional)“ und entfernter Aufwand-Zusatz
+- Sichtbarer Produktname „UniX“ ohne Namenszusätze; neutraler Menüpunkt „Aufgaben“
+
 ## M2 — CampusGig Pilot
 
 - Verifizierter Hochschulkontext
@@ -48,7 +54,7 @@ Exit: ein Campus, mindestens 50 veröffentlichte Gigs, 20 erfolgreiche Matches, 
 
 Exit: Nutzung und Wiederkehr je Modul rechtfertigen die dauerhafte Produktpflege.
 
-## M4 — SemesterMate Plus und Mobile
+## M4 — Erweiterte Studienplanung und Mobile
 
 - Kalenderimport mit expliziter Einwilligung
 - wiederkehrende Aufgaben und Benachrichtigungen

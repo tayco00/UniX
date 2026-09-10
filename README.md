@@ -1,14 +1,14 @@
 # UniX
 
-UniX ist ein Campus- und Studienplaner für Windows. Version 0.2.0 enthält eine persönliche Heute-Ansicht und SemesterMate für Aufgaben, Prüfungen, Abgaben und Lernblöcke. CampusGig, Marketplace und StudyMatch sind geplante Erweiterungen; sie sind noch nicht nutzbar.
+UniX ist ein Campus- und Studienplaner für Windows. Version 0.2.1 enthält eine persönliche Heute-Ansicht und Aufgabenverwaltung für Prüfungen, Abgaben, Lernblöcke, Organisation und Mensa/Cafétaria. CampusGig, Marketplace und StudyMatch sind geplante Erweiterungen; sie sind noch nicht nutzbar.
 
-Version 0.2.0 überarbeitet die Nutzerabläufe: zuverlässige Speicherbestätigung, Entwurfschutz, verständliche Fehler und ein Einstieg ohne vorgegebene Aufgaben. Noch nicht verfügbare Module stehen ausschließlich in der Roadmap.
+Version 0.2.1 ergänzt „Mensa/Cafétaria“ als Aufgabenart, entfernt den Zusatz unter „Aufwand in Minuten“ und schreibt optionale Feldhinweise einheitlich als „(optional)“. Die sichtbare Produktbenennung lautet ausschließlich „UniX“, der Aufgabenbereich heißt „Aufgaben“. Bestehende Daten bleiben erhalten; interne App-Kennungen werden für kompatible Updates beibehalten.
 
-[Quellcode auf GitHub](https://github.com/tayco00/UniX) · [Windows-Download v0.2.0](https://github.com/tayco00/UniX/releases/tag/v0.2.0)
+[Quellcode auf GitHub](https://github.com/tayco00/UniX) · [Windows-Download v0.2.1](https://github.com/tayco00/UniX/releases/tag/v0.2.1)
 
 ## Windows-App starten und beenden
 
-1. Auf der Release-Seite `UniX-0.2.0-Setup.exe` herunterladen und ausführen.
+1. Auf der Release-Seite `UniX-0.2.1-Setup.exe` herunterladen und ausführen.
 2. Im Installer die Desktop-Verknüpfung auswählen.
 3. UniX anschließend per Doppelklick auf das Desktop-Symbol oder über das Startmenü öffnen.
 4. Zum Beenden das Fenster schließen. Es bleibt kein Entwicklungsserver im Hintergrund.
@@ -22,7 +22,7 @@ Wer das Projekt bereits einschließlich eines entpackten Builds lokal hat, kann 
 - Ersteinrichtung mit drei Pflichtfeldern und einer leeren Aufgabenliste
 - Heute-Ansicht mit nächster Aufgabe, Fristen, Aufwand und Fortschritt
 - Aufgaben anlegen, bearbeiten, erledigen, wieder öffnen und nach Bestätigung löschen
-- Aufgabentyp, Modul, Frist, Aufwand, Priorität und Notiz
+- Aufgabenart (Prüfung, Abgabe, Lernblock, Organisation, Mensa/Cafétaria), Modul, Frist, Aufwand, Priorität und Notiz
 - Suche in Titel, Modul und Notiz; Statusfilter und schrittweise Anzeige großer Listen
 - Hell-, Dunkel- und Systemdarstellung einschließlich Änderungen der Windows-Einstellung
 - Speicherbestätigung erst nach erfolgreichem Schreiben; Entwürfe bleiben bei Fehlern erhalten
@@ -92,7 +92,7 @@ Installer erstellen:
 npm run build
 ```
 
-Ergebnis: `release/UniX-0.2.0-Setup.exe`. Beide Befehle führen zuerst die Qualitätsprüfung aus. Generierte Builds und Installationspakete gehören in GitHub Releases, nicht in die Git-Historie. Abhängigkeiten, Laufzeitdaten und Backups werden ebenfalls nicht eingecheckt.
+Ergebnis: `release/UniX-0.2.1-Setup.exe`. Beide Befehle führen zuerst die Qualitätsprüfung aus. Generierte Builds und Installationspakete gehören in GitHub Releases, nicht in die Git-Historie. Abhängigkeiten, Laufzeitdaten und Backups werden ebenfalls nicht eingecheckt.
 
 ## Daten und Wiederherstellung
 
@@ -115,7 +115,7 @@ UniX/
 │   ├── app/            Navigation und Zustandskoordination
 │   ├── components/     gemeinsame UI-Bausteine
 │   ├── domain/         Schema und Fachlogik
-│   ├── features/       Onboarding, Heute, SemesterMate, Einstellungen
+│   ├── features/       Onboarding, Heute, Aufgaben, Einstellungen
 │   └── infrastructure/ Repository und Desktop-Vertrag
 ├── scripts/            Start, Stop, Desktop- und Kriterienprüfungen
 ├── docs/               Architektur, Abnahme und Roadmap
@@ -134,7 +134,7 @@ UniX/
 
 ## Roadmap und Prüfstand
 
-M0 liefert das technische Fundament, M1 den hier enthaltenen SemesterMate-MVP. Es gibt aktuell keine automatische Erinnerung, Synchronisierung oder Zusammenarbeit mit anderen Nutzern; Fristen müssen selbst eingetragen werden. Aufgaben mit Aufwand 0 gelten als noch nicht geschätzt. Unterstützte Größe: bis zu 5.000 Aufgaben, bis zu 1.440 Minuten Aufwand je Aufgabe und 64 MiB je importierter Datei. Die Pilotvalidierung mit Studierenden sowie zusätzliche UX-, Accessibility- und Geräteprüfungen stehen noch aus. M2 plant CampusGig, M3 Marketplace und StudyMatch, M4 Kalender, Benachrichtigungen, Synchronisierung und Mobile. Die [Roadmap](docs/roadmap.md) enthält die jeweiligen Freigabekriterien.
+M0 liefert das technische Fundament, M1 die hier enthaltene Aufgabenverwaltung. Es gibt aktuell keine automatische Erinnerung, Synchronisierung oder Zusammenarbeit mit anderen Nutzern; Fristen müssen selbst eingetragen werden. Aufgaben mit Aufwand 0 gelten als noch nicht geschätzt. Unterstützte Größe: bis zu 5.000 Aufgaben, bis zu 1.440 Minuten Aufwand je Aufgabe und 64 MiB je importierter Datei. Die Pilotvalidierung mit Studierenden sowie zusätzliche UX-, Accessibility- und Geräteprüfungen stehen noch aus. M2 plant CampusGig, M3 Marketplace und StudyMatch, M4 Kalender, Benachrichtigungen, Synchronisierung und Mobile. Die [Roadmap](docs/roadmap.md) enthält die jeweiligen Freigabekriterien.
 
 Ein früheres lokales Referenzprojekt hat Feature-Grenzen, Datensicherheit und den eigenen Desktop-Lebenszyklus beeinflusst. Bei der Veröffentlichungsprüfung wurden zusätzlich relative Produktions-Assetpfade und die CommonJS-Preload-Datei für Electrons Sandbox korrigiert. Die frühere Aussage „108/108 verifiziert“ war zu weitgehend: Die Matrixzahl war eine Dokumentprüfung. [Abnahmematrix](docs/acceptance-criteria.md) und [Prüfprotokoll](docs/verification.md) beschreiben den tatsächlichen Nachweisumfang.
 

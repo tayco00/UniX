@@ -1,6 +1,12 @@
 import { z } from "zod";
 
-export const taskTypeSchema = z.enum(["exam", "assignment", "study", "admin"]);
+export const taskTypeSchema = z.enum([
+  "exam",
+  "assignment",
+  "study",
+  "admin",
+  "dining",
+]);
 export const prioritySchema = z.enum(["low", "medium", "high"]);
 export const taskStatusSchema = z.enum(["open", "done"]);
 

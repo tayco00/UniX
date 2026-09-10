@@ -13,6 +13,6 @@ $shortcut = $shell.CreateShortcut($shortcutPath)
 $shortcut.TargetPath = $exePath
 $shortcut.WorkingDirectory = Split-Path -Parent $exePath
 $shortcut.IconLocation = "$exePath,0"
-$shortcut.Description = 'UniX - dein Studienplaner'
+$shortcut.Description = 'UniX'
 $shortcut.Save()
 Write-Host "Desktop-Verknuepfung erstellt: $shortcutPath"

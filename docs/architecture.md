@@ -1,4 +1,4 @@
-# Architekturentscheidung: UniX Desktop MVP
+# Architekturentscheidung für UniX
 
 Status: akzeptiert · Stand: 10. September 2026
 
@@ -28,7 +28,7 @@ React UI
 ├── features/
 │   ├── onboarding/      Ersteinrichtung
 │   ├── dashboard/       Heute-Ansicht
-│   ├── semester/        SemesterMate
+│   ├── semester/        Aufgabenverwaltung
 │   └── settings/        Profil und Datenverwaltung
 ├── components/          Wiederverwendbare UI-Bausteine
 ├── domain/              Schema, Typen, Sortierung, Fristlogik
@@ -47,7 +47,7 @@ CampusGig, Marketplace und StudyMatch erhalten erst dann eigene Feature- und Dat
 
 Alle Schreibaktionen laufen durch `run`, das Doppelausführung synchron sperrt und Fehler abfängt. Die zentrale `commit`-Funktion liest den letzten bestätigten Zustand, validiert und wartet auf das Repository. Erst danach werden Anzeige und Erfolgsbestätigung aktualisiert. Import und Reset benutzen dieselbe Sperre und übernehmen nur validierte Resultate. Ein fehlgeschlagener Schreibversuch schließt keinen Editor.
 
-Ungespeicherte Eingaben werden beim Ansichtswechsel, Dialogschließen und Fensterschließen geschützt. Das Modal hält den Tastaturfokus; der Hintergrund ist inert. Systemdarstellung reagiert auf Windows-Änderungen. Eine minutengenaue Uhr und Fensterfokus-Ereignisse aktualisieren Datum und Gruß auch nach dem Tageswechsel. SemesterMate rendert zunächst 50 Treffer; die Suche erfasst dennoch den vollständigen Datenbestand.
+Ungespeicherte Eingaben werden beim Ansichtswechsel, Dialogschließen und Fensterschließen geschützt. Das Modal hält den Tastaturfokus; der Hintergrund ist inert. Systemdarstellung reagiert auf Windows-Änderungen. Eine minutengenaue Uhr und Fensterfokus-Ereignisse aktualisieren Datum und Gruß auch nach dem Tageswechsel. Aufgabenverwaltung rendert zunächst 50 Treffer; die Suche erfasst dennoch den vollständigen Datenbestand.
 
 ## Datenstrategie
 
@@ -73,3 +73,7 @@ Diese Grenzen reduzieren Datenschutz-, Moderations-, Marketplace- und Betriebsri
 ## Desktop-Referenzen
 
 Die Sandbox benötigt eine CommonJS-Preload-Datei ([Electron ESM-Dokumentation](https://www.electronjs.org/docs/latest/tutorial/esm)). Relative Assetpfade (`base: "./"`) unterstützen den lokalen Dateiaufruf des gebauten Renderers ([Vite Produktionsbuild](https://vite.dev/guide/build#relative-base)). Beide Eigenschaften werden zusätzlich in der gepackten EXE geprüft.
+
+## Ergänzung 0.2.1
+
+Die Aufgabenart `dining` ergänzt die bisherigen vier Werte in Renderer und Hauptprozess. Bestehende Datensätze und Sicherungen bleiben lesbar (Schema-Version 1); Sicherungen mit `dining` benötigen UniX ab 0.2.1. Sichtbare Modulnamen wurden zu neutralen Funktionsbezeichnungen vereinheitlicht. Paketname, App-ID und Datenpfad bleiben unverändert, damit Updates weder eine zweite Installation noch einen leeren neuen Datenordner erzeugen.

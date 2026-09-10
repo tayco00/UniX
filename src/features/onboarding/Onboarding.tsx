@@ -61,11 +61,11 @@ export function Onboarding({
             im Blick, was ansteht — und was schon geschafft ist.
           </p>
         </div>
-        <p className="story-foot">SEMESTERMATE · DEIN STUDIENPLANER</p>
+        <p className="story-foot">UniX</p>
       </section>
       <section className="onboarding-form-wrap">
         <form className="onboarding-form" onSubmit={submit} aria-busy={busy}>
-          <p className="eyebrow">WILLKOMMEN BEI UNIX</p>
+          <p className="eyebrow">Willkommen bei UniX</p>
           <h2>Dein Studium beginnt hier.</h2>
           <p className="form-intro">
             Richte dein Studienprofil ein. Du kannst alle Angaben später ändern.
@@ -116,7 +116,7 @@ export function Onboarding({
               </label>
               <label className="field">
                 <span>
-                  Semester <small>optional</small>
+                  Semester <small>(optional)</small>
                 </span>
                 <input
                   value={profile.semester}

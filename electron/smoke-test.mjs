@@ -74,6 +74,12 @@ export async function runSmokeTest(window, app, dialog) {
     assert.equal(initial.nodeAccess, "undefined");
     assert.equal(initial.info.platform, "win32");
     assert.equal(initial.data.onboardingCompleted, false);
+    assert.equal(await evaluate("document.title"), "UniX");
+    assert.equal(window.getTitle(), "UniX");
+    assert.match(
+      await evaluate("document.querySelector('.onboarding-grid').textContent"),
+      /Semester\s*\(optional\)/,
+    );
     await capture("onboarding");
     window.setSize(1040, 700);
     await capture("onboarding-1040");
@@ -100,15 +106,23 @@ export async function runSmokeTest(window, app, dialog) {
     );
     await fill(
       '.task-form input[maxlength="140"]',
-      "Datenbanken: Übungsblatt abgeben",
+      "Mittagspause in der Mensa",
     );
-    await fill('.task-form input[maxlength="100"]', "Datenbanken");
+    await fill('.task-form input[maxlength="100"]', "Campus");
     await fill('.task-form input[type="date"]', "2026-09-14");
     await fill('.task-form input[type="number"]', "20");
-    await fill(
-      ".task-form textarea",
-      "Normalformen prüfen und Quellen ergänzen.",
+    await fill(".task-form select", "dining");
+    assert.equal(
+      await evaluate(
+        "document.querySelector('.task-form select').selectedOptions[0].textContent",
+      ),
+      "Mensa/Cafétaria",
     );
+    assert.equal(
+      await evaluate("document.querySelector('#estimate-hint') === null"),
+      true,
+    );
+    await fill(".task-form textarea", "Treffpunkt vor dem Haupteingang.");
     await capture("task-editor");
     await evaluate("document.querySelector('.task-form').requestSubmit()");
     await waitFor("!document.querySelector('.task-form')");
@@ -116,6 +130,7 @@ export async function runSmokeTest(window, app, dialog) {
     const created = await evaluate("window.unixApi.load()");
     assert.equal(created.tasks.length, 1);
     assert.equal(created.tasks[0].estimateMinutes, 20);
+    assert.equal(created.tasks[0].type, "dining");
     await capture("dashboard");
     window.setSize(1040, 700);
     await capture("dashboard-1040");
@@ -129,7 +144,7 @@ export async function runSmokeTest(window, app, dialog) {
       (await evaluate("window.unixApi.load()")).tasks[0].id,
       created.tasks[0].id,
     );
-    await button("SemesterMate");
+    await button("Aufgaben");
     await waitFor("document.querySelector('.semester-page')");
     await click(".task-check");
     await idle();
@@ -145,16 +160,20 @@ export async function runSmokeTest(window, app, dialog) {
     await waitFor("document.querySelector('.task-row')");
     await click(".task-title-button");
     await waitFor("document.querySelector('.task-form')");
+    assert.equal(
+      await evaluate("document.querySelector('.task-form select').value"),
+      "dining",
+    );
     await fill(
       '.task-form input[maxlength="140"]',
-      "Datenbanken: Abgabe überarbeiten",
+      "Mittagspause mit Lerngruppe",
     );
     await evaluate("document.querySelector('.task-form').requestSubmit()");
     await waitFor("!document.querySelector('.task-form')");
     await idle();
     assert.equal(
       (await evaluate("window.unixApi.load()")).tasks[0].title,
-      "Datenbanken: Abgabe überarbeiten",
+      "Mittagspause mit Lerngruppe",
     );
 
     await button("Einstellungen");
@@ -179,6 +198,7 @@ export async function runSmokeTest(window, app, dialog) {
     await idle();
     const exported = JSON.parse(await readFile(backupPath, "utf8"));
     assert.equal(exported.tasks.length, 1);
+    assert.equal(exported.tasks[0].type, "dining");
     dialog.showOpenDialog = async () => ({
       canceled: false,
       filePaths: [backupPath],

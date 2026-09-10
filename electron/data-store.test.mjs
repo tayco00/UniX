@@ -225,6 +225,27 @@ describe("desktop task validation", () => {
     }
   });
 
+  it("persists, exports and reimports dining alongside existing task types", async () => {
+    const { store, path, directory } = await createStore();
+    const data = {
+      ...createEmptyData(),
+      tasks: [
+        task,
+        { ...task, id: "dining-1", type: "dining", title: "Mittagspause" },
+      ],
+    };
+    await store.save(data);
+    expect((await store.load()).tasks[1].type).toBe("dining");
+    const backup = join(directory, "export.json");
+    await writeFile(backup, await readFile(path));
+    const imported = await readValidated(backup);
+    await store.save(imported);
+    expect((await store.load()).tasks.map((entry) => entry.type)).toEqual([
+      "assignment",
+      "dining",
+    ]);
+  });
+
   it("rejects empty or duplicate task IDs before they can replace the current data", async () => {
     const { store } = await createStore();
     const original = await store.load();

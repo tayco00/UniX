@@ -1,8 +1,8 @@
 {
   "name": "unix-student-os",
   "productName": "UniX",
-  "version": "0.2.0",
-  "description": "Campus- und Studienplaner für Windows",
+  "version": "0.2.1",
+  "description": "UniX",
   "author": "UniX",
   "private": true,
   "type": "module",

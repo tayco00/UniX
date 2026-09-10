@@ -1,19 +1,27 @@
-# Prüfprotokoll 0.2.0 — UX-Härtung
+# Prüfprotokoll 0.2.1
 
-Stand: 10. September 2026. Windows 11 x64, Node.js 24.14.1. Der Prüfstand gilt für den verfügbaren SemesterMate-MVP, nicht für eine breite Produktionsfreigabe oder künftige Campus-Module.
+Stand: 10. September 2026. Windows 11 x64, Node.js 24.14.1. Der Prüfstand gilt für die verfügbare Aufgabenverwaltung, nicht für eine breite Produktionsfreigabe oder künftige Campus-Module.
 
 | Prüfung | Ergebnis |
 | --- | --- |
 | Typprüfung und ESLint | bestanden |
-| Vitest | 49 Tests in 4 Dateien bestanden |
+| Vitest | 52 Tests in 4 Dateien bestanden |
 | Produktions-Renderer | Vite-Build erfolgreich; JavaScript ca. 346 kB, gzip ca. 105 kB |
 | Nativer Entwicklungs-Build | vollständiger unten beschriebener Ablauf bestanden |
 | Gepackte Windows-EXE | Ablauf mit `app.isPackaged = true` bestanden |
-| Windows-Paket | `UniX-0.2.0-Setup.exe` erstellt |
+| Windows-Paket | `UniX-0.2.1-Setup.exe` erstellt |
 | Desktop-Verknüpfung | auf aktualisierte Projekt-EXE eingerichtet |
 | Start / Doppelstart / Stop | sichtbares Fenster, dieselbe Instanz beim Doppelstart, vollständiges reguläres Beenden und erneuter Stop bei beendeter App bestanden |
 | Abhängigkeiten | npm meldet 0 bekannte Schwachstellen zum Prüfzeitpunkt |
 | Abnahmematrix | 108 Kriterien: 53 durch ausgeführte Prüfungen, 54 durch Code-/Dokumentprüfung, 1 Pilot-Abnahme offen |
+
+## Ergänzungen in 0.2.1
+
+- Neue Art „Mensa/Cafétaria“ (`dining`) in Auswahl, Speicherung, Bearbeitung und Sicherungen geprüft; die bisherigen vier Arten bleiben gültig.
+- Native Fenster- und Dokumenttitel lauten exakt „UniX“; die Verknüpfung zeigt „UniX“ ohne Namenszusatz. Die tatsächliche EXE meldet Version 0.2.1.0.
+- Alle drei optionalen Feldhinweise in Einrichtung, Aufgabenformular und Profil stehen in Klammern.
+- Zusatz unter „Aufwand in Minuten“ und zugehöriger Accessibility-Verweis entfernt. Die bestehenden Eingabegrenzen bleiben unverändert.
+- Visuelle Prüfung des Aufgabenformulars mit ausgewählter neuer Art. Der native Probelauf verwendet `dining` auch über Neuladen, Bearbeiten und Sicherungs-Rundlauf hinweg.
 
 ## Geprobte Nutzerabläufe
 

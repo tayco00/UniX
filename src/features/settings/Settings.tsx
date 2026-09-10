@@ -78,7 +78,7 @@ function ProfileForm({
       </label>
       <label className="field">
         <span>
-          Semester <small>optional</small>
+          Semester <small>(optional)</small>
         </span>
         <input
           value={profile.semester}
@@ -122,7 +122,7 @@ export function Settings({
       <header className="page-title-row">
         <div>
           <p className="eyebrow">EINSTELLUNGEN</p>
-          <h1>Dein UniX.</h1>
+          <h1>UniX</h1>
           <p>Dein Studienprofil, deine Darstellung und deine Sicherungen.</p>
         </div>
       </header>
@@ -234,7 +234,7 @@ export function Settings({
           >
             UniX zurücksetzen
           </button>
-          {version && <p className="version-label">UniX {version}</p>}
+          {version && <p className="version-label">Version {version}</p>}
         </section>
       </div>
     </div>

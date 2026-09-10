@@ -748,6 +748,9 @@ button:disabled {
 .type-admin {
   background: var(--sand);
 }
+.type-dining {
+  background: var(--green);
+}
 .task-main {
   min-width: 0;
 }

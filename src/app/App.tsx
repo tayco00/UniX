@@ -376,7 +376,7 @@ export default function App() {
               type="button"
               onClick={() => navigate("semester")}
             >
-              <CalendarCheck size={18} /> SemesterMate
+              <CalendarCheck size={18} /> Aufgaben
             </button>
           </nav>
           <div className="sidebar-bottom">
@@ -451,7 +451,7 @@ export default function App() {
       </div>
       {editor && (
         <Modal
-          eyebrow="SEMESTERMATE"
+          eyebrow="UniX"
           title={editor.mode === "edit" ? "Aufgabe bearbeiten" : "Neue Aufgabe"}
           onClose={closeEditor}
           busy={busy}
