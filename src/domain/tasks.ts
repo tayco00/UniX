@@ -35,11 +35,21 @@ export function formatDueLabel(date: string, now = new Date()) {
   if (difference === 0) return "Heute";
   if (difference === 1) return "Morgen";
   if (difference <= 7) return `In ${difference} Tagen`;
-  return new Intl.DateTimeFormat("de-DE", { day: "2-digit", month: "short" }).format(localDate(date));
+  return new Intl.DateTimeFormat("de-DE", {
+    day: "2-digit",
+    month: "short",
+    ...(localDate(date).getFullYear() !== now.getFullYear()
+      ? { year: "numeric" as const }
+      : {}),
+  }).format(localDate(date));
 }
 
 export function sortTasks(tasks: Task[]) {
-  const priorityWeight: Record<Priority, number> = { high: 0, medium: 1, low: 2 };
+  const priorityWeight: Record<Priority, number> = {
+    high: 0,
+    medium: 1,
+    low: 2,
+  };
   return [...tasks].sort((left, right) => {
     if (left.status !== right.status) return left.status === "open" ? -1 : 1;
     const dateOrder = left.dueDate.localeCompare(right.dueDate);
@@ -53,38 +63,15 @@ export function openTasks(tasks: Task[]) {
 }
 
 export function dueThisWeek(tasks: Task[], now = new Date()) {
+  const daysToSunday = (7 - now.getDay()) % 7;
   return openTasks(tasks).filter((task) => {
     const remaining = daysUntil(task.dueDate, now);
-    return remaining >= 0 && remaining <= 7;
+    return remaining >= 0 && remaining <= daysToSunday;
   });
 }
 
 export function plannedMinutes(tasks: Task[]) {
-  return tasks.filter((task) => task.status === "open").reduce((sum, task) => sum + task.estimateMinutes, 0);
-}
-
-export function createDemoTasks(now = new Date()): Task[] {
-  const dateIn = (days: number) => {
-    const date = new Date(now);
-    date.setDate(date.getDate() + days);
-    return todayKey(date);
-  };
-  const createdAt = now.toISOString();
-  return [
-    {
-      id: crypto.randomUUID(), title: "Übungsblatt 4 fertigstellen", module: "Statistik",
-      type: "assignment", dueDate: dateIn(1), estimateMinutes: 90, priority: "high",
-      status: "open", notes: "Aufgaben 2 und 5 gemeinsam prüfen.", createdAt, updatedAt: createdAt,
-    },
-    {
-      id: crypto.randomUUID(), title: "Prüfungsvorbereitung: Kapitel 6", module: "Controlling",
-      type: "study", dueDate: dateIn(4), estimateMinutes: 120, priority: "medium",
-      status: "open", notes: "Zusammenfassung und 20 Karteikarten.", createdAt, updatedAt: createdAt,
-    },
-    {
-      id: crypto.randomUUID(), title: "Rückmeldung prüfen", module: "Studienorganisation",
-      type: "admin", dueDate: dateIn(8), estimateMinutes: 15, priority: "low",
-      status: "open", notes: "Semesterbeitrag im Portal kontrollieren.", createdAt, updatedAt: createdAt,
-    },
-  ];
+  return tasks
+    .filter((task) => task.status === "open")
+    .reduce((sum, task) => sum + task.estimateMinutes, 0);
 }

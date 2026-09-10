@@ -1,4 +1,9 @@
-import { appDataSchema, emptyAppData, type AppData, type AppInfo } from "../domain/model";
+import {
+  appDataSchema,
+  emptyAppData,
+  type AppData,
+  type AppInfo,
+} from "../domain/model";
 
 const BROWSER_KEY = "unix-local-preview-v1";
 
@@ -23,10 +28,18 @@ function browserRepository() {
       localStorage.setItem(BROWSER_KEY, JSON.stringify(initial));
       return initial;
     },
-    async exportBackup(): Promise<{ canceled: boolean; filePath?: string }> { return { canceled: true }; },
-    async importBackup(): Promise<{ canceled: boolean; data?: AppData }> { return { canceled: true }; },
+    async exportBackup(): Promise<{ canceled: boolean; filePath?: string }> {
+      return { canceled: true };
+    },
+    async importBackup(): Promise<{ canceled: boolean; data?: AppData }> {
+      return { canceled: true };
+    },
     async getAppInfo(): Promise<AppInfo> {
-      return { version: "0.1.0-web", dataPath: "Browser-Vorschau (localStorage)", platform: "web" };
+      return {
+        version: "Browser-Vorschau",
+        dataPath: "Browser-Vorschau",
+        platform: "web",
+      };
     },
   };
 }

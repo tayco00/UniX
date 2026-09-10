@@ -1,14 +1,14 @@
 # UniX
 
-UniX ist ein lokaler Campus- und Studienplaner für Windows. Version 0.1.0 enthält eine persönliche Heute-Ansicht und SemesterMate für Aufgaben, Prüfungen, Abgaben und Lernblöcke. CampusGig, Marketplace und StudyMatch sind geplante Erweiterungen; sie sind noch nicht nutzbar.
+UniX ist ein Campus- und Studienplaner für Windows. Version 0.2.0 enthält eine persönliche Heute-Ansicht und SemesterMate für Aufgaben, Prüfungen, Abgaben und Lernblöcke. CampusGig, Marketplace und StudyMatch sind geplante Erweiterungen; sie sind noch nicht nutzbar.
 
-Die App benötigt kein Konto, keine Cloud und keine externen APIs. Profil und Aufgaben bleiben auf dem PC.
+Version 0.2.0 überarbeitet die Nutzerabläufe: zuverlässige Speicherbestätigung, Entwurfschutz, verständliche Fehler und ein Einstieg ohne vorgegebene Aufgaben. Noch nicht verfügbare Module stehen ausschließlich in der Roadmap.
 
-[Quellcode auf GitHub](https://github.com/tayco00/UniX) · [Windows-Download v0.1.0](https://github.com/tayco00/UniX/releases/tag/v0.1.0)
+[Quellcode auf GitHub](https://github.com/tayco00/UniX) · [Windows-Download v0.2.0](https://github.com/tayco00/UniX/releases/tag/v0.2.0)
 
 ## Windows-App starten und beenden
 
-1. Auf der Release-Seite `UniX-0.1.0-Setup.exe` herunterladen und ausführen.
+1. Auf der Release-Seite `UniX-0.2.0-Setup.exe` herunterladen und ausführen.
 2. Im Installer die Desktop-Verknüpfung auswählen.
 3. UniX anschließend per Doppelklick auf das Desktop-Symbol oder über das Startmenü öffnen.
 4. Zum Beenden das Fenster schließen. Es bleibt kein Entwicklungsserver im Hintergrund.
@@ -19,14 +19,17 @@ Wer das Projekt bereits einschließlich eines entpackten Builds lokal hat, kann 
 
 ## Funktionsumfang
 
-- Ersteinrichtung mit drei Pflichtfeldern und abwählbaren Beispieldaten
+- Ersteinrichtung mit drei Pflichtfeldern und einer leeren Aufgabenliste
 - Heute-Ansicht mit nächster Aufgabe, Fristen, Aufwand und Fortschritt
 - Aufgaben anlegen, bearbeiten, erledigen, wieder öffnen und nach Bestätigung löschen
 - Aufgabentyp, Modul, Frist, Aufwand, Priorität und Notiz
-- Suche und Filter für offene, erledigte oder alle Aufgaben
-- Hell-, Dunkel- und Systemdarstellung
-- lokale Speicherung mit Schema-Prüfung und einer rotierenden Sicherung
-- JSON-Backup exportieren/importieren sowie Zurücksetzen mit Bestätigung
+- Suche in Titel, Modul und Notiz; Statusfilter und schrittweise Anzeige großer Listen
+- Hell-, Dunkel- und Systemdarstellung einschließlich Änderungen der Windows-Einstellung
+- Speicherbestätigung erst nach erfolgreichem Schreiben; Entwürfe bleiben bei Fehlern erhalten
+- Warnung vor dem Verwerfen ungespeicherter Eingaben und beim Schließen des Fensters
+- Schema-Prüfung, atomare Datenspeicherung und automatische Wiederherstellung mit Hinweis
+- JSON-Sicherungen exportieren/wiederherstellen, auch aus dem Startfehler-Bildschirm
+- Zurücksetzen mit Bestätigung für Hauptdaten und automatische Wiederherstellungskopie
 
 ## Entwicklung einrichten
 
@@ -65,7 +68,7 @@ npm run pack
 npm run test:packaged
 ```
 
-Die Desktop-Smoke-Tests verwenden separate temporäre Datenordner unter `.runtime/`. Sie prüfen den Produktions-Build in Electron, darunter das Laden der Oberfläche, die isolierte Desktop-Brücke sowie lokales Speichern und erneutes Laden. Sie ersetzen weder eine vollständige visuelle Abnahme noch einen Test des Installers auf einem frischen Windows-System.
+Die Desktop-Smoke-Tests verwenden separate temporäre Datenordner unter `.runtime/`. Sie durchlaufen Ersteinrichtung, Anlegen, Bearbeiten, Erledigen, Wiederöffnen, Löschen, Themenwechsel, Export/Import, ungültige Sicherung, Abbruch, Entwurfschutz beim Fensterschließen und Reset mit echten Dateien und der echten Desktop-Brücke. Datei- und Bestätigungsdialog-Antworten werden in diesen isolierten Tests simuliert. Sie ersetzen weder eine vollständige visuelle Abnahme noch einen Test des Installers auf einem frischen Windows-System.
 
 ## Build
 
@@ -89,15 +92,15 @@ Installer erstellen:
 npm run build
 ```
 
-Ergebnis: `release/UniX-0.1.0-Setup.exe`. Beide Befehle führen zuerst die Qualitätsprüfung aus. Generierte Builds und Installationspakete gehören in GitHub Releases, nicht in die Git-Historie. Abhängigkeiten, Laufzeitdaten und Backups werden ebenfalls nicht eingecheckt.
+Ergebnis: `release/UniX-0.2.0-Setup.exe`. Beide Befehle führen zuerst die Qualitätsprüfung aus. Generierte Builds und Installationspakete gehören in GitHub Releases, nicht in die Git-Historie. Abhängigkeiten, Laufzeitdaten und Backups werden ebenfalls nicht eingecheckt.
 
 ## Daten und Wiederherstellung
 
-Die Desktop-App speichert `unix-data.json` im Windows-App-Datenordner. Den tatsächlichen Speicherort zeigt **Einstellungen → Daten & Schutz**. Der Projektordner und der Nutzerdatenordner sind getrennt: Eine neue App-Version ersetzt dadurch nicht die persönlichen Aufgaben.
+Die Desktop-App speichert `unix-data.json` im Windows-App-Datenordner. Unter Windows ist das standardmäßig `%APPDATA%/UniX` (im Explorer in die Adresszeile eingeben). Die Oberfläche enthält bewusst keine technischen Speicherort- oder Offline-Werbehinweise. Der Projektordner und der Nutzerdatenordner sind getrennt: Eine neue App-Version ersetzt dadurch nicht die persönlichen Aufgaben.
 
 Gespeicherte Daten sind lokal, aber nicht verschlüsselt. Ein gültiger vorheriger Zustand wird als `unix-data.json.backup` vorgehalten; diese rotierende Sicherung ersetzt kein separat exportiertes Backup. Export und Import stehen in den Einstellungen bereit. Ein Import ersetzt nach Bestätigung die aktuellen Daten.
 
-Kann die Hauptdatei nicht validiert werden, versucht UniX die Sicherung. Sind beide Dateien unbrauchbar, zeigt die App einen Fehler. In diesem Fall beide Dateien vor weiteren Schritten sichern und ein gültiges exportiertes Backup zur Wiederherstellung verwenden. Die App überschreibt beschädigte Dateien beim Laden nicht stillschweigend.
+Kann die Hauptdatei nicht validiert werden, versucht UniX die Sicherung. Sind beide Dateien unbrauchbar, zeigt die App einen Fehler. In diesem Fall beide Dateien vor weiteren Schritten sichern und ein gültiges exportiertes Backup zur Wiederherstellung verwenden. Sind Hauptdatei und Sicherung beschädigt, bleiben sie beim Laden unangetastet. Nach erfolgreicher automatischer Wiederherstellung weist die App darauf hin, dass die jüngste Änderung fehlen könnte. **UniX zurücksetzen** leert auch die Wiederherstellungskopie; separat exportierte Dateien werden nicht entfernt.
 
 Die optionale Browser-Vorschau (`npm run dev:web`) nutzt `localStorage` statt der Desktop-Dateien. Export und Import sind dort deaktiviert; sie dient nur der Oberflächenentwicklung.
 
@@ -127,11 +130,11 @@ UniX/
 
 **Port 5173 ist belegt:** Nur der Entwicklungsmodus benötigt diesen Port. Den anderen Entwicklungsserver schließen oder den paketierten Desktop-Build starten.
 
-**Datenfehler beim Start:** Die Dateien im App-Datenordner zuerst separat sichern. Ein Fehler bei Hauptdatei und Sicherung wird bewusst angezeigt; ein Löschen der Dateien würde persönliche Daten entfernen.
+**Datenfehler beim Start:** Im Fehlerbildschirm erneut versuchen oder eine exportierte Sicherung wiederherstellen. Die Dateien im App-Datenordner vorher separat sichern. Ein Fehler bei Hauptdatei und Sicherung wird bewusst angezeigt; ein Löschen der Dateien würde persönliche Daten entfernen.
 
 ## Roadmap und Prüfstand
 
-M0 liefert das technische Fundament, M1 den hier enthaltenen SemesterMate-MVP. Die Pilotvalidierung mit Studierenden sowie zusätzliche UX-, Accessibility- und Geräteprüfungen stehen noch aus. M2 plant CampusGig, M3 Marketplace und StudyMatch, M4 Kalender, Benachrichtigungen, Synchronisierung und Mobile. Die [Roadmap](docs/roadmap.md) enthält die jeweiligen Freigabekriterien.
+M0 liefert das technische Fundament, M1 den hier enthaltenen SemesterMate-MVP. Es gibt aktuell keine automatische Erinnerung, Synchronisierung oder Zusammenarbeit mit anderen Nutzern; Fristen müssen selbst eingetragen werden. Aufgaben mit Aufwand 0 gelten als noch nicht geschätzt. Unterstützte Größe: bis zu 5.000 Aufgaben, bis zu 1.440 Minuten Aufwand je Aufgabe und 64 MiB je importierter Datei. Die Pilotvalidierung mit Studierenden sowie zusätzliche UX-, Accessibility- und Geräteprüfungen stehen noch aus. M2 plant CampusGig, M3 Marketplace und StudyMatch, M4 Kalender, Benachrichtigungen, Synchronisierung und Mobile. Die [Roadmap](docs/roadmap.md) enthält die jeweiligen Freigabekriterien.
 
 Ein früheres lokales Referenzprojekt hat Feature-Grenzen, Datensicherheit und den eigenen Desktop-Lebenszyklus beeinflusst. Bei der Veröffentlichungsprüfung wurden zusätzlich relative Produktions-Assetpfade und die CommonJS-Preload-Datei für Electrons Sandbox korrigiert. Die frühere Aussage „108/108 verifiziert“ war zu weitgehend: Die Matrixzahl war eine Dokumentprüfung. [Abnahmematrix](docs/acceptance-criteria.md) und [Prüfprotokoll](docs/verification.md) beschreiben den tatsächlichen Nachweisumfang.
 

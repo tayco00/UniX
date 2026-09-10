@@ -19,6 +19,17 @@
 
 Exit: 10–15 Studierende verwenden UniX vier Wochen; mindestens 50 % öffnen es an zwei Tagen pro Woche. Kritische Datenverluste: null.
 
+## M1.1 — UX-Härtung (0.2.0 implementiert)
+
+- Keine funktionslosen Navigationseinträge, keine Speicher-Werbetexte, keine automatischen Beispielaufgaben
+- Bestätigte statt optimistischer Speicherung; fehlgeschlagene Versuche wiederholbar
+- Schutz ungespeicherter Eingaben, Tastaturfokus im Dialog, lesbare Texte und kleine Fenster
+- Korrekte Kalenderwoche, Tageszeitbegrüßung und Statusdarstellung erledigter Aufgaben
+- Abgesicherter Sicherungsimport, Wiederherstellung aus Startfehlern und Rücksetzen beider Dateigenerationen
+- Erweiterte Nutzerablauf- und native Desktop-Tests, einschließlich Fehler- und Abbruchpfaden
+
+Vor breitem Rollout weiter offen: Installer/Upgrade/Deinstallation auf einem frischen zweiten Windows-Gerät, Code Signing, Screenreader-/Hochkontrastprüfung, reale Pilotnutzung. Die funktionale MVP-Prüfung ersetzt diese Freigaben nicht.
+
 ## M2 — CampusGig Pilot
 
 - Verifizierter Hochschulkontext

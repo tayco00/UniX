@@ -11,7 +11,7 @@ $quitRequest = Start-Process -FilePath $exePath -ArgumentList '--unix-quit' -Win
 if (-not $quitRequest.WaitForExit(10000)) { throw 'Die Beenden-Anfrage wurde nicht abgeschlossen.' }
 foreach ($unixProcess in $unixProcesses) {
   if (-not $unixProcess.WaitForExit(10000)) {
-    throw 'UniX wartet noch auf einen Dialog oder Speichervorgang. Bitte das UniX-Fenster prüfen.'
+    throw 'UniX wartet noch auf einen Dialog oder Speichervorgang. Bitte das UniX-Fenster pruefen.'
   }
 }
-Write-Host 'UniX wurde regulär beendet.'
+Write-Host 'UniX wurde regulaer beendet.'

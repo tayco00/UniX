@@ -1,35 +1,50 @@
-# Prüfprotokoll zur Veröffentlichung 0.1.0
+# Prüfprotokoll 0.2.0 — UX-Härtung
 
-Stand: 10. September 2026. Geprüft auf dem lokalen Windows-11-x64-Entwicklungsgerät mit Node.js 24.14.1.
+Stand: 10. September 2026. Windows 11 x64, Node.js 24.14.1. Der Prüfstand gilt für den verfügbaren SemesterMate-MVP, nicht für eine breite Produktionsfreigabe oder künftige Campus-Module.
 
 | Prüfung | Ergebnis |
 | --- | --- |
-| TypeScript-Prüfung | bestanden |
-| ESLint | bestanden |
-| Vitest | 27 Tests in 4 Dateien bestanden |
-| Produktions-Renderer | Vite-Build erfolgreich |
-| Native Electron-Prüfung | Oberfläche, Preload-Brücke, Node-Isolation und Dateipersistenz nach Reload bestanden |
-| Gepackte EXE | derselbe native Test mit `app.isPackaged = true` bestanden |
-| Windows-Paket | NSIS-Installer und entpackte EXE erstellt |
-| Start, Doppelstart, Stop | sichtbares natives Fenster, gleiche Instanz beim Doppelstart, reguläres Beenden und erneuter Stop bei beendeter App bestanden |
-| Desktop-Verknüpfung | erstellt und Zielpfad auf die gebaute Projekt-EXE geprüft |
-| Abhängigkeitsprüfung | npm meldet 0 bekannte Schwachstellen zum Prüfzeitpunkt |
+| Typprüfung und ESLint | bestanden |
+| Vitest | 49 Tests in 4 Dateien bestanden |
+| Produktions-Renderer | Vite-Build erfolgreich; JavaScript ca. 346 kB, gzip ca. 105 kB |
+| Nativer Entwicklungs-Build | vollständiger unten beschriebener Ablauf bestanden |
+| Gepackte Windows-EXE | Ablauf mit `app.isPackaged = true` bestanden |
+| Windows-Paket | `UniX-0.2.0-Setup.exe` erstellt |
+| Desktop-Verknüpfung | auf aktualisierte Projekt-EXE eingerichtet |
+| Start / Doppelstart / Stop | sichtbares Fenster, dieselbe Instanz beim Doppelstart, vollständiges reguläres Beenden und erneuter Stop bei beendeter App bestanden |
+| Abhängigkeiten | npm meldet 0 bekannte Schwachstellen zum Prüfzeitpunkt |
+| Abnahmematrix | 108 Kriterien: 53 durch ausgeführte Prüfungen, 54 durch Code-/Dokumentprüfung, 1 Pilot-Abnahme offen |
 
-Die 13 Dateispeichertests prüfen unter anderem fehlende oder beschädigte Hauptdateien, gültige und beschädigte Sicherungen, konkurrierende Zugriffe und ungültige Datensätze. Die 14 weiteren Tests prüfen Domäne, Datenverträge und ausgewählte Nutzerabläufe.
+## Geprobte Nutzerabläufe
 
-Der native Test verwendet ausschließlich eigene Daten unter `.runtime/desktop-smoke-*`; er ersetzt keine Nutzerdaten. Ein Screenshot der nativen Onboarding-Ansicht wurde auf Darstellung geprüft. Die Abnahmematrix unterscheidet diese Nachweise ausdrücklich von bloßen Quellcode-Prüfungen.
+- Ersteinrichtung mit persönlichen Angaben, ohne automatisch angelegte Aufgaben.
+- Aufgabe mit Titel, Bereich, Datum, Aufwand und Notiz anlegen; über die Desktop-Brücke in echte Dateien schreiben.
+- Neuladen der App und Wiederfinden derselben Aufgabe mit unveränderter ID.
+- Erledigen, im Erledigt-Filter finden, wieder öffnen, bearbeiten und löschen.
+- Hell-/Dunkel-Darstellung sowie Profilansicht.
+- Sicherung exportieren und einlesen, Import abbrechen, anderen Profilnamen wiederherstellen und fehlerhaftes JSON ohne Änderung am gültigen Datenbestand zurückweisen.
+- Fensterschließen mit ungespeichertem Profil: Warnung auslösen, Abbruch wählen, Fenster und Eingaben bleiben erhalten.
+- Reset zurück zur Ersteinrichtung.
+- Native Screenshots bei 1.440 × 920 und 1.040 × 700 einschließlich Prüfung auf horizontales Überlaufen; vertikales Scrollen ist zulässig.
 
-## Korrigierte Veröffentlichungsfehler
+Der native Test läuft vollständig in eigenen Verzeichnissen `.runtime/desktop-smoke-*`. Fenster, Renderer, Sandbox, IPC und Dateien sind echt. **Antworten der Datei- und Bestätigungsdialoge werden simuliert.** Das testet die Verarbeitung dieser Entscheidungen, nicht die manuelle Bedienung jedes Windows-Dateidialogs. Eine absichtlich ungültige Importdatei erzeugt eine erwartete Fehlermeldung im Testlog; geprüft wird dabei, dass das Produkt einen verständlichen Fehler anzeigt und die gültigen Daten nicht ersetzt.
 
-- Produktions-Assets hatten absolute Pfade und sind jetzt relativ zum gebauten Dokument.
-- Die Preload-Brücke verwendet CommonJS, damit sie in Electrons Sandbox geladen wird.
-- Primärdateien werden atomar ersetzt; gültige Sicherungen bleiben bei Wiederherstellung erhalten.
-- Der Import fragt vor dem Ersetzen vorhandener Daten nach.
-- IPC-Aufrufe werden auf Hauptfenster und vertrauenswürdige Dokumentquelle beschränkt.
-- Start und Stop arbeiten mit der fertigen Projekt-EXE; der Stop fordert reguläres Beenden an.
+Die App-Integrationstests ergänzen abgelehnte und verzögerte Schreiboperationen, Doppelklickschutz, erneutes Speichern eines erhaltenen Entwurfs, Tastaturfokus und Escape, Navigation mit Entwurf, Importabbruch und Profilaktualisierung, Exportfehler, Resetfehler, Pflichtfeldvalidierung und Suche/Paginierung mit 125 Aufgaben. Dateispeichertests prüfen unter anderem atomare Schreibfolgen, konkurrierende Zugriffe, beschädigte Haupt-/Sicherungsdateien, die 64-MiB-Importgrenze und das Verhindern einer Wiederkehr zurückgesetzter Daten.
 
-## Noch offene Grenzen
+## Gefundene und korrigierte Probleme
 
-Kein vollständiger Installer-Test auf einem frischen zweiten Windows-Gerät und kein Code-Signing-Zertifikat. Keine umfassende Accessibility-, Last- oder mobile Prüfung. Die Speicheranzeige im Renderer ist noch optimistisch; ein Fehler wird gemeldet, der Text „gespeichert“ wird aber noch nicht zuverlässig an die abgeschlossene Dateischreiboperation gekoppelt. Der Browser-Fallback ist eine Entwicklungsansicht. Die Erledigen-/Wiederöffnen-, Bearbeiten-, Löschen- und Dateidialog-Abläufe sind noch nicht alle als vollständige native Ende-zu-Ende-Tests abgedeckt.
+- Erfolgsanzeige vor Abschluss des Speicherns; Editor schloss auch bei Speicherfehlern.
+- Risiko doppelter Eingaben und irreführende Erfolgsmeldungen bei fehlgeschlagenen Dateioperationen.
+- Entwurfsverlust bei Dialog-, Ansichts- oder Fensterschließen; instabiler Fokus und fehlende Fokusbegrenzung.
+- Ungefragte Beispielaufgaben, falsche Zwei-Schritte-Anzeige, funktionslose Zukunftsmodule und technische Werbetexte.
+- Rollierendes Acht-Tage-Fenster als „diese Woche“, unpassende Tageszeitbegrüßung und überfällige Beschriftung erledigter Aufgaben.
+- Aufwand-Auswahl konnte gültige Werte aus Sicherungen nicht korrekt bearbeiten.
+- Profilfelder wurden nach Import nicht zuverlässig erneuert.
+- Unbemerkter Rückfall auf eine ältere Sicherung; Reset ließ alte Daten in der Wiederherstellungskopie zurück.
+- Zu kleine Hilfstexte, abgeschnittene Inhalte und unbeschränkte gleichzeitige Darstellung langer Aufgabenlisten.
 
-Die frühere Pauschalaussage „108/108 verifiziert“ war daher nicht korrekt. Der Kriterien-Checker validiert nur die Struktur des Katalogs; der native Desktop-Test ist ein zusätzlicher, gesonderter Prüfschritt.
+## Verbleibende Freigaben vor breitem Rollout
+
+Noch nicht nachgewiesen: Installation, Upgrade und Deinstallation auf einem frischen zweiten Windows-Gerät; vollständige Screenreader-, Hochkontrast-, DPI- und Lastprüfung; echte Pilotnutzung mit Studierenden. Der Installer ist nicht signiert. Es gibt keine Garantie für problemfreien Betrieb auf beliebiger Hardware und keinen Nachweis einer vollständigen Barrierefreiheit.
+
+CampusGig, Marketplace, StudyMatch, automatische Erinnerungen und Synchronisierung sind nicht Bestandteil dieses MVP. 108 Kriterien bedeuten weiterhin **nicht** 108 bestandene Funktionstests. Die Matrix ist ein nachvollziehbarer Prüfkatalog; weitere Geräte- und Nutzerprüfungen bleiben Voraussetzung für eine breite Freigabe.

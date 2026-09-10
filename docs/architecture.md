@@ -41,7 +41,13 @@ Electron
 └── data-store.mjs       Validierung, Schreiben, Rückfallebene
 ```
 
-CampusGig, Marketplace und StudyMatch erhalten erst dann eigene Feature- und Datenmodule, wenn ihr jeweiliger Meilenstein beginnt. Im MVP sind sie nur als nicht anklickbare, ehrlich beschriftete Roadmap-Einträge sichtbar.
+CampusGig, Marketplace und StudyMatch erhalten erst dann eigene Feature- und Datenmodule, wenn ihr jeweiliger Meilenstein beginnt. Sie sind in der MVP-Navigation nicht sichtbar; die Roadmap ist in der Dokumentation getrennt vom nutzbaren Produkt.
+
+## UX- und Schreibgrenze (0.2.0)
+
+Alle Schreibaktionen laufen durch `run`, das Doppelausführung synchron sperrt und Fehler abfängt. Die zentrale `commit`-Funktion liest den letzten bestätigten Zustand, validiert und wartet auf das Repository. Erst danach werden Anzeige und Erfolgsbestätigung aktualisiert. Import und Reset benutzen dieselbe Sperre und übernehmen nur validierte Resultate. Ein fehlgeschlagener Schreibversuch schließt keinen Editor.
+
+Ungespeicherte Eingaben werden beim Ansichtswechsel, Dialogschließen und Fensterschließen geschützt. Das Modal hält den Tastaturfokus; der Hintergrund ist inert. Systemdarstellung reagiert auf Windows-Änderungen. Eine minutengenaue Uhr und Fensterfokus-Ereignisse aktualisieren Datum und Gruß auch nach dem Tageswechsel. SemesterMate rendert zunächst 50 Treffer; die Suche erfasst dennoch den vollständigen Datenbestand.
 
 ## Datenstrategie
 
@@ -49,7 +55,9 @@ CampusGig, Marketplace und StudyMatch erhalten erst dann eigene Feature- und Dat
 - Maximale Datensatzgröße: 5.000 Aufgaben; Einzeltexte besitzen feste Längenlimits.
 - Validierung erfolgt an beiden Vertrauensgrenzen: im Renderer mit Zod und im Hauptprozess vor Dateizugriff.
 - Schreibfolge: gültige vorhandene Datei sichern → temporäre Datei schreiben und synchronisieren → Zieldatei durch Umbenennen atomar ersetzen. Lese- und Schreiboperationen teilen eine Warteschlange.
-- Lesefolge: Primärdatei → rotierende Sicherung → verständlicher Fehlerzustand.
+- Lesefolge: Primärdatei → rotierende Sicherung mit Nutzerhinweis → verständlicher Fehlerzustand mit Importmöglichkeit.
+- Import prüft die Dateigröße am geöffneten Handle vor dem Lesen (64 MiB). Ein fertig eingerichtetes Profil benötigt nichtleere Pflichtangaben an beiden Validierungsgrenzen.
+- Reset ersetzt zuerst die Wiederherstellungskopie, danach die Hauptdatei durch den leeren Zustand. Nach erfolgreichem Reset kann eine spätere Wiederherstellung keine gelöschten Aufgaben zurückholen. Dies ist keine gemeinsame Dateisystemtransaktion: Bei einem Abbruch vor dem zweiten Schritt bleibt die Hauptdatei erhalten, die bisherige Sicherung ist dann bereits zurückgesetzt.
 - Wechsel zu SQLite: wenn Beziehungen, Volltextsuche, Datenmengen oder Sync-Protokoll dies messbar rechtfertigen. Das Repository bleibt dabei stabil.
 
 ## Bewusst nicht im MVP

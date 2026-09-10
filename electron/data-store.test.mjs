@@ -1,20 +1,33 @@
 // @vitest-environment node
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, open, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { createEmptyData, DataStore, isValidData } from "./data-store.mjs";
+import {
+  createEmptyData,
+  DataStore,
+  isValidData,
+  readValidated,
+} from "./data-store.mjs";
 
 const temporaryDirectories = [];
 
 async function createStore() {
   const directory = await mkdtemp(join(tmpdir(), "unix-store-test-"));
   temporaryDirectories.push(directory);
-  return { directory, path: join(directory, "unix-data.json"), store: new DataStore(join(directory, "unix-data.json")) };
+  return {
+    directory,
+    path: join(directory, "unix-data.json"),
+    store: new DataStore(join(directory, "unix-data.json")),
+  };
 }
 
 afterEach(async () => {
-  await Promise.all(temporaryDirectories.splice(0).map((directory) => rm(directory, { recursive: true, force: true })));
+  await Promise.all(
+    temporaryDirectories
+      .splice(0)
+      .map((directory) => rm(directory, { recursive: true, force: true })),
+  );
 });
 
 describe("desktop data store", () => {
@@ -29,7 +42,17 @@ describe("desktop data store", () => {
     const { path, store } = await createStore();
     const first = createEmptyData();
     await store.save(first);
-    await store.save({ ...first, onboardingCompleted: true, updatedAt: new Date().toISOString() });
+    await store.save({
+      ...first,
+      profile: {
+        name: "Alex",
+        university: "TU",
+        studyProgram: "Informatik",
+        semester: "",
+      },
+      onboardingCompleted: true,
+      updatedAt: new Date().toISOString(),
+    });
     expect(JSON.parse(await readFile(`${path}.backup`, "utf8"))).toEqual(first);
   });
 
@@ -37,7 +60,17 @@ describe("desktop data store", () => {
     const { path, store } = await createStore();
     const valid = createEmptyData();
     await store.save(valid);
-    await store.save({ ...valid, onboardingCompleted: true, updatedAt: new Date().toISOString() });
+    await store.save({
+      ...valid,
+      profile: {
+        name: "Alex",
+        university: "TU",
+        studyProgram: "Informatik",
+        semester: "",
+      },
+      onboardingCompleted: true,
+      updatedAt: new Date().toISOString(),
+    });
     await writeFile(path, "not-json", "utf8");
     expect((await store.load()).onboardingCompleted).toBe(false);
     expect(JSON.parse(await readFile(`${path}.backup`, "utf8"))).toEqual(valid);
@@ -60,7 +93,9 @@ describe("desktop data store", () => {
     const { path, store } = await createStore();
     await writeFile(`${path}.backup`, "broken-backup", "utf8");
     await expect(store.load()).rejects.toThrow("nicht sicher gelesen");
-    await expect(readFile(path, "utf8")).rejects.toMatchObject({ code: "ENOENT" });
+    await expect(readFile(path, "utf8")).rejects.toMatchObject({
+      code: "ENOENT",
+    });
     expect(await readFile(`${path}.backup`, "utf8")).toBe("broken-backup");
   });
 
@@ -121,32 +156,86 @@ describe("desktop data store", () => {
     const { path, store } = await createStore();
     const base = createEmptyData();
     await Promise.all([
-      store.save({ ...base, profile: { ...base.profile, name: "A" }, updatedAt: new Date().toISOString() }),
-      store.save({ ...base, profile: { ...base.profile, name: "B" }, updatedAt: new Date().toISOString() }),
+      store.save({
+        ...base,
+        profile: { ...base.profile, name: "A" },
+        updatedAt: new Date().toISOString(),
+      }),
+      store.save({
+        ...base,
+        profile: { ...base.profile, name: "B" },
+        updatedAt: new Date().toISOString(),
+      }),
     ]);
     expect(JSON.parse(await readFile(path, "utf8")).profile.name).toBe("B");
   });
 });
 
 describe("desktop task validation", () => {
+  it("rejects completed but empty profiles", () => {
+    expect(
+      isValidData({ ...createEmptyData(), onboardingCompleted: true }),
+    ).toBe(false);
+  });
+  it("resets the recovery generation so erased data cannot return", async () => {
+    const { store, path } = await createStore();
+    const original = createEmptyData();
+    original.profile.name = "Do not resurrect";
+    await store.save(original);
+    const reset = await store.reset();
+    expect(await readValidated(`${path}.backup`)).toEqual(reset);
+    await writeFile(path, "corrupt", "utf8");
+    expect((await store.load()).profile.name).toBe("");
+  });
+  it("rejects oversized imported files before reading their contents", async () => {
+    const { path } = await createStore();
+    const file = await open(path, "w");
+    try {
+      await file.truncate(64 * 1024 * 1024 + 1);
+    } finally {
+      await file.close();
+    }
+    await expect(readValidated(path)).rejects.toThrow("zu groß");
+  });
   const task = {
-    id: "task-1", title: "Task", module: "Module", type: "assignment",
-    dueDate: "2028-02-29", estimateMinutes: 30, priority: "medium", status: "open",
-    notes: "", createdAt: "2026-09-10T10:00:00.000Z", updatedAt: "2026-09-10T10:00:00.000Z",
+    id: "task-1",
+    title: "Task",
+    module: "Module",
+    type: "assignment",
+    dueDate: "2028-02-29",
+    estimateMinutes: 30,
+    priority: "medium",
+    status: "open",
+    notes: "",
+    createdAt: "2026-09-10T10:00:00.000Z",
+    updatedAt: "2026-09-10T10:00:00.000Z",
   };
 
   it("accepts a real leap date and rejects nonexistent calendar dates", () => {
     expect(isValidData({ ...createEmptyData(), tasks: [task] })).toBe(true);
-    for (const dueDate of ["2027-02-29", "2026-02-30", "2026-13-01", "2026-00-10"]) {
-      expect(isValidData({ ...createEmptyData(), tasks: [{ ...task, dueDate }] })).toBe(false);
+    for (const dueDate of [
+      "2027-02-29",
+      "2026-02-30",
+      "2026-13-01",
+      "2026-00-10",
+    ]) {
+      expect(
+        isValidData({ ...createEmptyData(), tasks: [{ ...task, dueDate }] }),
+      ).toBe(false);
     }
   });
 
   it("rejects empty or duplicate task IDs before they can replace the current data", async () => {
     const { store } = await createStore();
     const original = await store.load();
-    for (const tasks of [[{ ...task, id: "" }], [{ ...task, id: " " }], [task, { ...task }]]) {
-      await expect(store.save({ ...original, tasks })).rejects.toThrow("Ungültiger");
+    for (const tasks of [
+      [{ ...task, id: "" }],
+      [{ ...task, id: " " }],
+      [task, { ...task }],
+    ]) {
+      await expect(store.save({ ...original, tasks })).rejects.toThrow(
+        "Ungültiger",
+      );
       expect(await store.load()).toEqual(original);
     }
   });

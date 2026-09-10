@@ -29,55 +29,94 @@ function isString(value, max = 5000) {
 }
 
 function isCalendarDate(value) {
-  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value))
+    return false;
   const parsed = new Date(`${value}T00:00:00.000Z`);
-  return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+  return (
+    Number.isFinite(parsed.getTime()) &&
+    parsed.toISOString().slice(0, 10) === value
+  );
 }
 
 export function isValidData(value) {
-  if (!value || typeof value !== "object" || value.version !== DATA_VERSION) return false;
+  if (!value || typeof value !== "object" || value.version !== DATA_VERSION)
+    return false;
   if (typeof value.onboardingCompleted !== "boolean") return false;
   if (!value.profile || !isString(value.profile.name, 80)) return false;
-  if (!isString(value.profile.university, 120) || !isString(value.profile.studyProgram, 120)) return false;
+  if (
+    !isString(value.profile.university, 120) ||
+    !isString(value.profile.studyProgram, 120)
+  )
+    return false;
   if (!isString(value.profile.semester, 40)) return false;
+  if (
+    value.onboardingCompleted &&
+    ![
+      value.profile.name,
+      value.profile.university,
+      value.profile.studyProgram,
+    ].every((entry) => entry.trim().length > 0)
+  )
+    return false;
   if (!Array.isArray(value.tasks) || value.tasks.length > 5000) return false;
-  if (!value.settings || !["light", "dark", "system"].includes(value.settings.theme)) return false;
+  if (
+    !value.settings ||
+    !["light", "dark", "system"].includes(value.settings.theme)
+  )
+    return false;
   if (![0, 1].includes(value.settings.weekStartsOn)) return false;
   if (!isString(value.updatedAt, 40)) return false;
 
   const identifiers = new Set();
 
   return value.tasks.every((task) => {
-    if (!task || !isString(task.id, 80) || task.id.trim().length === 0 || identifiers.has(task.id)) return false;
+    if (
+      !task ||
+      !isString(task.id, 80) ||
+      task.id.trim().length === 0 ||
+      identifiers.has(task.id)
+    )
+      return false;
     identifiers.add(task.id);
-    return isString(task.title, 140) && task.title.trim().length > 0 &&
-    isString(task.module, 100) &&
-    ["exam", "assignment", "study", "admin"].includes(task.type) &&
-    isCalendarDate(task.dueDate) &&
-    Number.isInteger(task.estimateMinutes) && task.estimateMinutes >= 0 && task.estimateMinutes <= 1440 &&
-    ["low", "medium", "high"].includes(task.priority) &&
-    ["open", "done"].includes(task.status) &&
-    isString(task.notes, 2000) &&
-    isString(task.createdAt, 40) &&
-    isString(task.updatedAt, 40);
+    return (
+      isString(task.title, 140) &&
+      task.title.trim().length > 0 &&
+      isString(task.module, 100) &&
+      ["exam", "assignment", "study", "admin"].includes(task.type) &&
+      isCalendarDate(task.dueDate) &&
+      Number.isInteger(task.estimateMinutes) &&
+      task.estimateMinutes >= 0 &&
+      task.estimateMinutes <= 1440 &&
+      ["low", "medium", "high"].includes(task.priority) &&
+      ["open", "done"].includes(task.status) &&
+      isString(task.notes, 2000) &&
+      isString(task.createdAt, 40) &&
+      isString(task.updatedAt, 40)
+    );
   });
 }
 
-async function readValidated(filePath) {
+export async function readValidated(filePath) {
   const file = await open(filePath, "r");
   try {
     if ((await file.stat()).size > MAX_FILE_BYTES) {
-      throw Object.assign(new Error("UniX-Datendatei ist zu groß"), { code: "UNIX_INVALID_DATA" });
+      throw Object.assign(new Error("UniX-Datendatei ist zu groß"), {
+        code: "UNIX_INVALID_DATA",
+      });
     }
     let parsed;
     try {
       parsed = JSON.parse(await file.readFile("utf8"));
     } catch (error) {
       if (!(error instanceof SyntaxError)) throw error;
-      throw Object.assign(new Error("Ungültiges UniX-JSON"), { code: "UNIX_INVALID_DATA" });
+      throw Object.assign(new Error("Ungültiges UniX-JSON"), {
+        code: "UNIX_INVALID_DATA",
+      });
     }
     if (!isValidData(parsed)) {
-      throw Object.assign(new Error("Ungültiges UniX-Datenschema"), { code: "UNIX_INVALID_DATA" });
+      throw Object.assign(new Error("Ungültiges UniX-Datenschema"), {
+        code: "UNIX_INVALID_DATA",
+      });
     }
     return parsed;
   } finally {
@@ -107,6 +146,7 @@ export class DataStore {
     this.filePath = filePath;
     this.backupPath = `${filePath}.backup`;
     this.writeQueue = Promise.resolve();
+    this.recoveredFromBackup = false;
   }
 
   enqueue(operation) {
@@ -136,9 +176,10 @@ export class DataStore {
         await this.write(initial);
         return initial;
       }
-      throw new Error("Die lokalen UniX-Daten konnten nicht sicher gelesen werden.");
+      throw new Error("Die UniX-Daten konnten nicht sicher gelesen werden.");
     }
     await this.write(backup, { preserveBackup: true });
+    this.recoveredFromBackup = true;
     return backup;
   }
 
@@ -150,7 +191,8 @@ export class DataStore {
 
   async write(data, { preserveBackup = false } = {}) {
     const contents = `${JSON.stringify(data, null, 2)}\n`;
-    if (Buffer.byteLength(contents, "utf8") > MAX_FILE_BYTES) throw new Error("UniX-Datendatei ist zu groß");
+    if (Buffer.byteLength(contents, "utf8") > MAX_FILE_BYTES)
+      throw new Error("UniX-Datendatei ist zu groß");
     await mkdir(dirname(this.filePath), { recursive: true });
     if (!preserveBackup) {
       let previous;
@@ -159,15 +201,27 @@ export class DataStore {
       } catch (error) {
         if (!["ENOENT", "UNIX_INVALID_DATA"].includes(error?.code)) throw error;
       }
-      if (previous) await replaceAtomically(this.backupPath, `${JSON.stringify(previous, null, 2)}\n`);
+      if (previous)
+        await replaceAtomically(
+          this.backupPath,
+          `${JSON.stringify(previous, null, 2)}\n`,
+        );
     }
     await replaceAtomically(this.filePath, contents);
     return data;
   }
 
   async reset() {
-    const empty = createEmptyData();
-    await this.save(empty);
-    return empty;
+    return this.enqueue(async () => {
+      const empty = createEmptyData();
+      await mkdir(dirname(this.filePath), { recursive: true });
+      // Reset both generations, so old tasks cannot reappear after a later recovery.
+      await replaceAtomically(
+        this.backupPath,
+        `${JSON.stringify(empty, null, 2)}\n`,
+      );
+      await this.write(empty, { preserveBackup: true });
+      return empty;
+    });
   }
 }
