@@ -1,12 +1,4 @@
-import {
-  ArrowRight,
-  BookOpen,
-  CalendarDays,
-  Check,
-  Clock3,
-  Plus,
-  Sparkles,
-} from "lucide-react";
+import { ArrowRight, CalendarDays, Check, Clock3, Plus } from "lucide-react";
 import type { AppData, Task } from "../../domain/model";
 import {
   dueThisWeek,
@@ -45,13 +37,10 @@ export function Dashboard({
   const week = dueThisWeek(data.tasks, now);
   const overdue = open.filter((task) => task.dueDate < todayKey(now)).length;
   const done = data.tasks.filter((task) => task.status === "done").length;
-  const progress = data.tasks.length
-    ? Math.round((done / data.tasks.length) * 100)
-    : 0;
   const firstName = data.profile.name.split(/\s+/)[0];
   const dateLabel = new Intl.DateTimeFormat("de-DE", {
     weekday: "long",
-    day: "2-digit",
+    day: "numeric",
     month: "long",
   }).format(now);
   const greeting =
@@ -69,7 +58,7 @@ export function Dashboard({
           <h1>
             {greeting}, {firstName}.
           </h1>
-          <p>Hier ist, was heute wirklich zählt.</p>
+          <p>Dein Tag, auf einen Blick.</p>
         </div>
         {data.tasks.length > 0 && (
           <button
@@ -82,40 +71,64 @@ export function Dashboard({
         )}
       </header>
 
-      <section className="focus-card">
-        <div className="focus-kicker">
-          <Sparkles size={15} />
-          <span>NÄCHSTER SCHRITT</span>
-        </div>
+      {data.tasks.length > 0 && (
+        <dl className="overview-strip" aria-label="Studienübersicht">
+          <div>
+            <dt>Offene Aufgaben</dt>
+            <dd>{open.length}</dd>
+            <span>{done} erledigt</span>
+          </div>
+          <div>
+            <dt>Fristen bis Sonntag</dt>
+            <dd>{week.length}</dd>
+            <span className={overdue ? "overdue" : ""}>
+              {overdue
+                ? `${overdue} zusätzlich überfällig`
+                : "Ab heute gerechnet"}
+            </span>
+          </div>
+          <div>
+            <dt>Geplanter Aufwand</dt>
+            <dd>{formatMinutes(plannedMinutes(data.tasks))}</dd>
+            <span>Für alle offenen Aufgaben</span>
+          </div>
+        </dl>
+      )}
+
+      <section
+        className={`focus-card ${next ? "" : "focus-card-empty"}`}
+        aria-label="Nächster Schritt"
+      >
         {next ? (
           <>
             <div className="focus-content">
-              <div>
-                <p>{next.module || taskTypeLabels[next.type]}</p>
-                <h2>
-                  <button
-                    className="task-title-button"
-                    type="button"
-                    onClick={() => onEditTask(next)}
-                  >
-                    {next.title}
-                  </button>
-                </h2>
-              </div>
+              <p className="eyebrow">Als Nächstes</p>
+              <h2>
+                <button
+                  className="task-title-button"
+                  type="button"
+                  onClick={() => onEditTask(next)}
+                >
+                  {next.title}
+                </button>
+              </h2>
+              <p className="focus-subject">
+                {next.module || taskTypeLabels[next.type]}
+              </p>
               <div className="focus-meta">
-                <span>
-                  <CalendarDays size={16} /> {formatDueLabel(next.dueDate)}
+                <span className={next.dueDate < todayKey(now) ? "overdue" : ""}>
+                  <CalendarDays size={15} /> {formatDueLabel(next.dueDate)}
                 </span>
                 <span>
-                  <Clock3 size={16} />{" "}
+                  <Clock3 size={15} />{" "}
                   {next.estimateMinutes
                     ? formatMinutes(next.estimateMinutes)
-                    : "Aufwand noch offen"}
+                    : "Aufwand offen"}
                 </span>
               </div>
             </div>
             <button
-              className="focus-action"
+              className="button button-quiet focus-action"
               type="button"
               onClick={() => onToggleTask(next)}
             >
@@ -124,160 +137,69 @@ export function Dashboard({
           </>
         ) : (
           <div className="focus-empty">
-            <div>
-              <p>{done ? "Gut geschafft" : "Dein nächster Schritt"}</p>
-              <h2>{done ? "Alles erledigt." : "Was steht bei dir an?"}</h2>
-            </div>
+            <span className="empty-symbol" aria-hidden="true">
+              {done ? <Check size={24} /> : <Plus size={24} />}
+            </span>
+            <h2>{done ? "Alles erledigt." : "Was steht bei dir an?"}</h2>
+            <p>
+              {done
+                ? "Dein Plan ist auf dem aktuellen Stand. Zeit für eine Pause."
+                : "Starte mit deiner nächsten Prüfung, Abgabe oder Lerneinheit."}
+            </p>
             <button
-              className="button button-inverse"
+              className="button button-primary"
               type="button"
               onClick={onAddTask}
             >
               {done ? "Neue Aufgabe anlegen" : "Erste Aufgabe anlegen"}
+              <ArrowRight size={16} />
             </button>
+            {done > 0 && (
+              <button
+                className="text-button"
+                type="button"
+                onClick={onOpenSemester}
+              >
+                Zur Aufgabenliste <ArrowRight size={15} />
+              </button>
+            )}
           </div>
         )}
       </section>
 
-      {data.tasks.length > 0 && (
-        <>
-          <section className="metric-grid" aria-label="Studienübersicht">
-            <article className="metric-card">
-              <div className="metric-icon coral">
-                <CalendarDays size={19} />
-              </div>
-              <div>
-                <strong>{week.length}</strong>
-                <span>Fristen bis Sonntag</span>
-              </div>
-              <small className={overdue ? "overdue" : ""}>
-                {overdue
-                  ? `Zusätzlich ${overdue} überfällig`
-                  : "Heute bis einschließlich Sonntag"}
-              </small>
-            </article>
-            <article className="metric-card">
-              <div className="metric-icon blue">
-                <BookOpen size={19} />
-              </div>
-              <div>
-                <strong>{open.length}</strong>
-                <span>Offene Aufgaben</span>
-              </div>
-              <small>
-                {open.length
-                  ? `${open.filter((task) => task.priority === "high").length} mit hoher Priorität`
-                  : "Alles erledigt"}
-              </small>
-            </article>
-            <article className="metric-card">
-              <div className="metric-icon sand">
-                <Clock3 size={19} />
-              </div>
-              <div>
-                <strong>{formatMinutes(plannedMinutes(data.tasks))}</strong>
-                <span>Geplanter Aufwand</span>
-              </div>
-              <small>Über alle offenen Aufgaben</small>
-            </article>
-            <article className="metric-card progress-card">
-              <div className="metric-progress">
-                <span
-                  style={
-                    {
-                      "--progress": `${progress * 3.6}deg`,
-                    } as React.CSSProperties
-                  }
-                >
-                  <b>{progress}%</b>
-                </span>
-              </div>
-              <div>
-                <span>Fortschritt</span>
-                <small>
-                  {done} von {data.tasks.length} erledigt
-                </small>
-              </div>
-            </article>
-          </section>
-
-          <section className="content-grid">
-            <div className="panel tasks-panel">
-              <header className="panel-header">
-                <div>
-                  <p className="eyebrow">NACH FÄLLIGKEIT</p>
-                  <h2>Als Nächstes</h2>
-                </div>
-                <button
-                  className="text-button"
-                  type="button"
-                  onClick={onOpenSemester}
-                >
-                  Zur Aufgabenliste <ArrowRight size={15} />
-                </button>
-              </header>
-              {open.length ? (
-                <div className="task-list">
-                  {open.slice(0, 4).map((task) => (
-                    <TaskRow
-                      key={task.id}
-                      task={task}
-                      onToggle={() => onToggleTask(task)}
-                      onEdit={() => onEditTask(task)}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="empty-panel">
-                  <span>
-                    <Check size={22} />
-                  </span>
-                  <h3>Nichts offen</h3>
-                  <p>Plane eine Aufgabe, wenn etwas Neues ansteht.</p>
-                  <button
-                    className="text-button"
-                    type="button"
-                    onClick={onAddTask}
-                  >
-                    Aufgabe anlegen
-                  </button>
-                </div>
-              )}
+      {next && (
+        <section className="tasks-panel" aria-labelledby="upcoming-title">
+          <header className="panel-header">
+            <div>
+              <h2 id="upcoming-title">Deine Aufgaben</h2>
+              <p>Nach Fälligkeit sortiert</p>
             </div>
-            <aside className="panel semester-card">
-              <div className="semester-top">
-                <p className="eyebrow">DEIN KONTEXT</p>
-                <span>{data.profile.semester || "Semester"}</span>
-              </div>
-              <h2>{data.profile.studyProgram}</h2>
-              <p>{data.profile.university}</p>
-              <div className="semester-rule" />
-              <div className="semester-stats">
-                <div>
-                  <strong>
-                    {
-                      new Set(open.map((task) => task.module).filter(Boolean))
-                        .size
-                    }
-                  </strong>
-                  <span>Module & Bereiche</span>
-                </div>
-                <div>
-                  <strong>{done}</strong>
-                  <span>erledigt</span>
-                </div>
-              </div>
-              <button
-                className="button button-quiet wide-button"
-                type="button"
-                onClick={onOpenSemester}
-              >
-                Semester öffnen <ArrowRight size={15} />
-              </button>
-            </aside>
-          </section>
-        </>
+            <button
+              className="text-button"
+              type="button"
+              onClick={onOpenSemester}
+            >
+              Zur Aufgabenliste <ArrowRight size={15} />
+            </button>
+          </header>
+          <div className="task-list">
+            {open.slice(0, 5).map((task) => (
+              <TaskRow
+                key={task.id}
+                task={task}
+                onToggle={() => onToggleTask(task)}
+                onEdit={() => onEditTask(task)}
+              />
+            ))}
+          </div>
+        </section>
       )}
+
+      <footer className="study-context">
+        <span>{data.profile.university}</span>
+        <span>{data.profile.studyProgram}</span>
+        {data.profile.semester && <span>{data.profile.semester}</span>}
+      </footer>
     </div>
   );
 }

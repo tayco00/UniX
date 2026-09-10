@@ -35,9 +35,9 @@ export function SemesterMate({
     <div className="page semester-page">
       <header className="page-title-row">
         <div>
-          <p className="eyebrow">UniX</p>
-          <h1>Semester im Griff.</h1>
-          <p>Fristen, Lernblöcke und Organisation in einer ruhigen Liste.</p>
+          <p className="eyebrow">Dein Studium</p>
+          <h1>Aufgaben</h1>
+          <p>Prüfungen, Abgaben und alles dazwischen.</p>
         </div>
         <button
           className="button button-primary"

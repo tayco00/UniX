@@ -121,7 +121,7 @@ export function Settings({
     <div className="page settings-page">
       <header className="page-title-row">
         <div>
-          <p className="eyebrow">EINSTELLUNGEN</p>
+          <p className="eyebrow">Einstellungen</p>
           <h1>UniX</h1>
           <p>Dein Studienprofil, deine Darstellung und deine Sicherungen.</p>
         </div>

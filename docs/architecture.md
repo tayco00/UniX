@@ -77,3 +77,7 @@ Die Sandbox benötigt eine CommonJS-Preload-Datei ([Electron ESM-Dokumentation](
 ## Ergänzung 0.2.1
 
 Die Aufgabenart `dining` ergänzt die bisherigen vier Werte in Renderer und Hauptprozess. Bestehende Datensätze und Sicherungen bleiben lesbar (Schema-Version 1); Sicherungen mit `dining` benötigen UniX ab 0.2.1. Sichtbare Modulnamen wurden zu neutralen Funktionsbezeichnungen vereinheitlicht. Paketname, App-ID und Datenpfad bleiben unverändert, damit Updates weder eine zweite Installation noch einen leeren neuen Datenordner erzeugen.
+
+## Gestaltung 0.3.0
+
+Das Redesign ersetzt die bisherige Stylesheet-Sammlung durch ein gemeinsames semantisches Farbsystem. Die Fachlogik bleibt in den vorhandenen Modulen; geändert werden Darstellung und Anordnung, nicht Datenverträge oder Speicherpfade. Nur der Vorgabewert für neue Profile wechselt von System zu Dunkel. Gespeicherte Farbschemata bleiben gültig. Desktop-Icon und Fenstericon werden aus einem eigenen SVG ohne zusätzliche Bibliothek erzeugt. [Gestaltungsgrundlagen](design.md) und native Kontrast-/Layoutprüfungen sichern die visuelle Weiterentwicklung ab.

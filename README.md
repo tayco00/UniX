@@ -1,14 +1,18 @@
 # UniX
 
-UniX ist ein Campus- und Studienplaner für Windows. Version 0.2.1 enthält eine persönliche Heute-Ansicht und Aufgabenverwaltung für Prüfungen, Abgaben, Lernblöcke, Organisation und Mensa/Cafétaria. CampusGig, Marketplace und StudyMatch sind geplante Erweiterungen; sie sind noch nicht nutzbar.
+UniX ist ein Campus- und Studienplaner für Windows. Version 0.3.0 enthält eine persönliche Heute-Ansicht und Aufgabenverwaltung für Prüfungen, Abgaben, Lernblöcke, Organisation und Mensa/Cafétaria. CampusGig, Marketplace und StudyMatch sind geplante Erweiterungen; sie sind noch nicht nutzbar.
 
-Version 0.2.1 ergänzt „Mensa/Cafétaria“ als Aufgabenart, entfernt den Zusatz unter „Aufwand in Minuten“ und schreibt optionale Feldhinweise einheitlich als „(optional)“. Die sichtbare Produktbenennung lautet ausschließlich „UniX“, der Aufgabenbereich heißt „Aufgaben“. Bestehende Daten bleiben erhalten; interne App-Kennungen werden für kompatible Updates beibehalten.
+Version 0.3.0 gestaltet die gesamte Oberfläche neu: tiefes Tannengrün, Salbei-Akzente, klare Aufgabenzeilen und ruhige Formulare. Die Heute-Ansicht ersetzt einzelne Statistik-Kacheln und den Fortschrittsring durch eine kompakte Übersicht. Einrichtung, Einstellungen, Dialoge und Desktop-Symbol folgen derselben Gestaltung. Neue Profile starten dunkel; bestehende Farbschema-Einstellungen und Daten bleiben erhalten. In den Einstellungen kann zwischen Dunkel, Hell und System gewechselt werden. Die sichtbare Produktbenennung lautet ausschließlich „UniX“.
 
-[Quellcode auf GitHub](https://github.com/tayco00/UniX) · [Windows-Download v0.2.1](https://github.com/tayco00/UniX/releases/tag/v0.2.1)
+[Quellcode auf GitHub](https://github.com/tayco00/UniX) · [Windows-Download v0.3.0](https://github.com/tayco00/UniX/releases/tag/v0.3.0) · [Gestaltungsgrundlagen](docs/design.md)
+
+![UniX mit dunkelgrüner Oberfläche](docs/screenshots/dashboard-dark.png)
+
+Die Abbildung zeigt isolierte Testaufgaben. Die tatsächliche App legt keine Beispielaufgaben an.
 
 ## Windows-App starten und beenden
 
-1. Auf der Release-Seite `UniX-0.2.1-Setup.exe` herunterladen und ausführen.
+1. Auf der Release-Seite `UniX-0.3.0-Setup.exe` herunterladen und ausführen.
 2. Im Installer die Desktop-Verknüpfung auswählen.
 3. UniX anschließend per Doppelklick auf das Desktop-Symbol oder über das Startmenü öffnen.
 4. Zum Beenden das Fenster schließen. Es bleibt kein Entwicklungsserver im Hintergrund.
@@ -20,7 +24,7 @@ Wer das Projekt bereits einschließlich eines entpackten Builds lokal hat, kann 
 ## Funktionsumfang
 
 - Ersteinrichtung mit drei Pflichtfeldern und einer leeren Aufgabenliste
-- Heute-Ansicht mit nächster Aufgabe, Fristen, Aufwand und Fortschritt
+- Heute-Ansicht mit nächster Aufgabe, Fristen, Aufwand und Anzahl erledigter Aufgaben
 - Aufgaben anlegen, bearbeiten, erledigen, wieder öffnen und nach Bestätigung löschen
 - Aufgabenart (Prüfung, Abgabe, Lernblock, Organisation, Mensa/Cafétaria), Modul, Frist, Aufwand, Priorität und Notiz
 - Suche in Titel, Modul und Notiz; Statusfilter und schrittweise Anzeige großer Listen
@@ -70,6 +74,8 @@ npm run test:packaged
 
 Die Desktop-Smoke-Tests verwenden separate temporäre Datenordner unter `.runtime/`. Sie durchlaufen Ersteinrichtung, Anlegen, Bearbeiten, Erledigen, Wiederöffnen, Löschen, Themenwechsel, Export/Import, ungültige Sicherung, Abbruch, Entwurfschutz beim Fensterschließen und Reset mit echten Dateien und der echten Desktop-Brücke. Datei- und Bestätigungsdialog-Antworten werden in diesen isolierten Tests simuliert. Sie ersetzen weder eine vollständige visuelle Abnahme noch einen Test des Installers auf einem frischen Windows-System.
 
+Die Designprüfung ergänzt 28 Farbkontrast-Paarungen, Screenshots beider Farbschemata, leere und gefüllte Listen, lange Titel, 1.040 × 700 und 1.440 × 920 große Fenster sowie 200 % Renderer-Vergrößerung. Die Formulare bleiben scrollbar; Speichern ist auch bei vergrößerter Darstellung erreichbar. Das ist keine vollständige Barrierefreiheits- oder Windows-DPI-Zertifizierung.
+
 ## Build
 
 Entpackten Windows-Build erstellen:
@@ -92,7 +98,9 @@ Installer erstellen:
 npm run build
 ```
 
-Ergebnis: `release/UniX-0.2.1-Setup.exe`. Beide Befehle führen zuerst die Qualitätsprüfung aus. Generierte Builds und Installationspakete gehören in GitHub Releases, nicht in die Git-Historie. Abhängigkeiten, Laufzeitdaten und Backups werden ebenfalls nicht eingecheckt.
+Ergebnis: `release/UniX-0.3.0-Setup.exe`. Beide Befehle führen zuerst die Qualitätsprüfung aus. Generierte Builds und Installationspakete gehören in GitHub Releases, nicht in die Git-Historie. Abhängigkeiten, Laufzeitdaten und Backups werden ebenfalls nicht eingecheckt.
+
+Die eingecheckten Windows-Icons lassen sich nach einer Änderung an `build/icon.svg` mit `npm run icons` neu erzeugen. Das verwendet die gebündelte Electron-Laufzeit, keine externe Grafik-API. Danach die App erneut bauen.
 
 ## Daten und Wiederherstellung
 

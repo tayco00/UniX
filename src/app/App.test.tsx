@@ -204,6 +204,20 @@ describe("UniX user journeys", () => {
     expect(stored.tasks).toHaveLength(1);
   });
 
+  it("keeps previous success messages out of a newly opened task dialog", async () => {
+    const user = await openEditor();
+    await user.type(screen.getByLabelText("Aufgabe"), "Testaufgabe");
+    await user.click(screen.getByRole("button", { name: "Aufgabe anlegen" }));
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Aufgabe angelegt",
+    );
+    await user.click(
+      screen.getByRole("button", { name: "Aufgabe" }),
+    );
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
   it("does not acknowledge pending writes or accept double submissions", async () => {
     let finish!: (data: AppData) => void;
     save.mockImplementationOnce(
@@ -431,6 +445,7 @@ describe("UniX user journeys", () => {
   });
 
   it("does not apply a theme until it has been saved, nor lose profile edits", async () => {
+    stored.settings.theme = "light";
     const user = await settings();
     await user.type(screen.getByLabelText("Name"), " Entwurf");
     save.mockRejectedValueOnce(new Error("locked"));

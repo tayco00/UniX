@@ -30,7 +30,6 @@ export function TaskRow({
       >
         {task.status === "done" ? <Check size={16} /> : <Circle size={16} />}
       </button>
-      <div className={`type-mark type-${task.type}`} aria-hidden="true" />
       <div className="task-main">
         <h3>
           <button

@@ -50,23 +50,23 @@ export function Onboarding({
       <section className="onboarding-story">
         <Logo />
         <div className="story-copy">
-          <p className="eyebrow light">DEIN STUDIUM. DEIN SYSTEM.</p>
+          <p className="eyebrow">Ein guter Anfang.</p>
           <h1>
-            Platz für
+            Mehr Überblick.
             <br />
-            deinen Plan.
+            Mehr Freiraum.
           </h1>
           <p>
             Prüfungen, Abgaben und die nächste Lerneinheit. Mit UniX behältst du
             im Blick, was ansteht — und was schon geschafft ist.
           </p>
         </div>
-        <p className="story-foot">UniX</p>
+        <p className="story-foot">Raum für das, was ansteht.</p>
       </section>
       <section className="onboarding-form-wrap">
         <form className="onboarding-form" onSubmit={submit} aria-busy={busy}>
           <p className="eyebrow">Willkommen bei UniX</p>
-          <h2>Dein Studium beginnt hier.</h2>
+          <h2>Dein Studienprofil.</h2>
           <p className="form-intro">
             Richte dein Studienprofil ein. Du kannst alle Angaben später ändern.
           </p>

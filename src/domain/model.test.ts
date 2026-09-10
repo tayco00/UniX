@@ -7,6 +7,16 @@ import {
 } from "./model";
 
 describe("data contracts", () => {
+  it("starts dark and preserves existing explicit theme preferences", () => {
+    expect(emptyAppData().settings.theme).toBe("dark");
+    for (const theme of ["system", "light", "dark"] as const) {
+      const data = {
+        ...emptyAppData(),
+        settings: { theme, weekStartsOn: 1 as const },
+      };
+      expect(appDataSchema.parse(data).settings.theme).toBe(theme);
+    }
+  });
   it("accepts dining and all existing task types but rejects unknown types", () => {
     for (const type of ["exam", "assignment", "study", "admin", "dining"]) {
       expect(taskTypeSchema.parse(type)).toBe(type);

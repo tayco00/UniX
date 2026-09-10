@@ -17,7 +17,7 @@ export function createEmptyData() {
     },
     tasks: [],
     settings: {
-      theme: "system",
+      theme: "dark",
       weekStartsOn: 1,
     },
     updatedAt: new Date().toISOString(),

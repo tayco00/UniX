@@ -83,6 +83,6 @@ export const emptyAppData = (): AppData => ({
   onboardingCompleted: false,
   profile: { name: "", university: "", studyProgram: "", semester: "" },
   tasks: [],
-  settings: { theme: "system", weekStartsOn: 1 },
+  settings: { theme: "dark", weekStartsOn: 1 },
   updatedAt: new Date().toISOString(),
 });

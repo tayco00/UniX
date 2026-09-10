@@ -86,7 +86,7 @@ export default function App() {
       window.removeEventListener("beforeunload", protectDraft);
     };
   }, []);
-  const theme = data?.settings.theme ?? "system";
+  const theme = data?.settings.theme ?? "dark";
   useEffect(() => {
     const media = window.matchMedia("(prefers-color-scheme: dark)");
     const apply = () => {
@@ -359,7 +359,7 @@ export default function App() {
         <aside className="sidebar">
           <Logo />
           <nav aria-label="Hauptnavigation">
-            <p className="nav-label">DEIN STUDIUM</p>
+            <p className="nav-label">Übersicht</p>
             <button
               disabled={busy}
               aria-current={view === "dashboard" ? "page" : undefined}
@@ -481,7 +481,8 @@ export default function App() {
           <LoaderCircle className="spinner" size={16} /> Bitte warten …
         </div>
       ) : (
-        toast && (
+        toast &&
+        !editor && (
           <div className="toast" role="status">
             <Check size={16} /> {toast}
           </div>

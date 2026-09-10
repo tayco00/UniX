@@ -31,12 +31,13 @@ function trustedNavigation(url) {
 function createWindow() {
   mainWindow = new BrowserWindow({
     title: "UniX",
+    icon: join(currentDirectory, "..", "build", "icon.png"),
     width: 1440,
     height: 920,
     minWidth: 1040,
     minHeight: 700,
     show: false,
-    backgroundColor: "#f4f1ea",
+    backgroundColor: "#101d18",
     autoHideMenuBar: true,
     webPreferences: {
       preload: join(currentDirectory, "preload.cjs"),

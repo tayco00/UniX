@@ -1,19 +1,33 @@
-# Prüfprotokoll 0.2.1
+# Prüfprotokoll 0.3.0
 
 Stand: 10. September 2026. Windows 11 x64, Node.js 24.14.1. Der Prüfstand gilt für die verfügbare Aufgabenverwaltung, nicht für eine breite Produktionsfreigabe oder künftige Campus-Module.
 
 | Prüfung | Ergebnis |
 | --- | --- |
 | Typprüfung und ESLint | bestanden |
-| Vitest | 52 Tests in 4 Dateien bestanden |
-| Produktions-Renderer | Vite-Build erfolgreich; JavaScript ca. 346 kB, gzip ca. 105 kB |
+| Vitest | 54 Tests in 4 Dateien bestanden |
+| Produktions-Renderer | Vite-Build erfolgreich; JavaScript ca. 344 kB, gzip ca. 104 kB |
 | Nativer Entwicklungs-Build | vollständiger unten beschriebener Ablauf bestanden |
 | Gepackte Windows-EXE | Ablauf mit `app.isPackaged = true` bestanden |
-| Windows-Paket | `UniX-0.2.1-Setup.exe` erstellt |
+| Windows-Paket | `UniX-0.3.0-Setup.exe` erstellt; EXE meldet 0.3.0.0 |
 | Desktop-Verknüpfung | auf aktualisierte Projekt-EXE eingerichtet |
 | Start / Doppelstart / Stop | sichtbares Fenster, dieselbe Instanz beim Doppelstart, vollständiges reguläres Beenden und erneuter Stop bei beendeter App bestanden |
 | Abhängigkeiten | npm meldet 0 bekannte Schwachstellen zum Prüfzeitpunkt |
 | Abnahmematrix | 108 Kriterien: 53 durch ausgeführte Prüfungen, 54 durch Code-/Dokumentprüfung, 1 Pilot-Abnahme offen |
+
+## Redesign 0.3.0
+
+- Komplette dunkelgrüne Gestaltung in Einrichtung, Navigation, Tagesübersicht, Aufgabenliste, Einstellungen, Dialogen und App-Symbol. Zusätzlich eine abgestimmte helle Darstellung.
+- Statistiken als kompakte Zeile statt vier Einzelkarten; Fortschrittsring und redundante Kontextkarte entfernt. Aufgaben und Formulare bleiben der Schwerpunkt.
+- 28 Farbkontrast-Paarungen gegen die ausgelieferten CSS-Tokens bestanden. Geprüfte Texte erreichen mindestens 4,5:1; Eingaberänder mindestens 3:1. Die Messwerte stehen im nativen Laufprotokoll.
+- Native Screenshots mit leeren Zuständen, sechs Testaufgaben, langem Titel und erfolgloser Suche. Ansichten bei 1.040 × 700 und 1.440 × 920 ohne horizontales Überlaufen; Dialogaktionen nach Scrollen erreichbar.
+- Aufgabenliste, Einstellungen und Dialog bei 200 % Renderer-Zoom geprüft. Das ersetzt keine Prüfung aller Windows-Skalierungen oder Screenreader.
+- Erfolgsmeldungen verdecken bei geöffnetem Editor keine Formularaktionen und fangen keine Klicks ab; zusätzlicher Regressionstest.
+- Neue Profile starten dunkel; Schema-Test erhält ausdrücklich gespeicherte Werte für Hell, Dunkel und System. Kein Wechsel des bestehenden Datenpfads oder der App-ID.
+- Abschließender Start-/Doppelstart-/Stop-Probelauf mit der gebauten EXE bestanden. Prüfsumme der tatsächlichen Nutzerdatendatei vor und nach diesem Ablauf identisch.
+- Beide abschließenden nativen Läufe bestanden: Entwicklung `.runtime/desktop-smoke-aEzh4H`, gepackte EXE `.runtime/desktop-smoke-mddrtS`. Die vollständigen Protokolle und Screenshots bleiben in diesen ignorierten Projektverzeichnissen. Drei ausgewählte Bilder unter `docs/screenshots/` zeigen ausschließlich Testdaten.
+
+Die Tests haben keine Daten in die persönliche Aufgabenliste übernommen. Gestaltung und Grenzen sind in [design.md](design.md) beschrieben.
 
 ## Ergänzungen in 0.2.1
 

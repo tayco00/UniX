@@ -38,6 +38,9 @@ export async function runSmokeTest(window, app, dialog) {
   const capture = async (name) => {
     await evaluate("document.fonts.ready.then(() => true)");
     await settle();
+    await evaluate(
+      "Promise.all(document.getAnimations().filter(animation => animation.effect?.getTiming().iterations !== Infinity).map(animation => animation.finished.catch(() => undefined))).then(() => true)",
+    );
     await writeFile(
       join(directory, `${name}.png`),
       (
@@ -52,6 +55,57 @@ export async function runSmokeTest(window, app, dialog) {
       true,
       `${name}: horizontal overflow`,
     );
+  };
+  const contrastResults = [];
+  const checkContrast = async () => {
+    const tokens = await evaluate(`(() => {
+      const style = getComputedStyle(document.documentElement);
+      return Object.fromEntries(['canvas','surface','surface-soft','sidebar','ink','muted','accent','on-accent','accent-soft','danger','danger-soft','control-line'].map(key => [key, style.getPropertyValue('--' + key).trim()]));
+    })()`);
+    const luminance = (hex) => {
+      if (hex.length === 4)
+        hex = `#${hex
+          .slice(1)
+          .split("")
+          .map((value) => value + value)
+          .join("")}`;
+      const channels = hex
+        .slice(1)
+        .match(/../g)
+        .map((value) => parseInt(value, 16) / 255)
+        .map((value) =>
+          value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4,
+        );
+      return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+    };
+    const pairs = [
+      ...["canvas", "surface", "surface-soft", "sidebar"].flatMap((bg) => [
+        ["ink", bg, 4.5],
+        ["muted", bg, 4.5],
+      ]),
+      ["on-accent", "accent", 4.5],
+      ["accent", "accent-soft", 4.5],
+      ["danger", "surface", 4.5],
+      ["danger", "danger-soft", 4.5],
+      ["control-line", "canvas", 3],
+      ["control-line", "surface", 3],
+    ];
+    for (const [fg, bg, minimum] of pairs) {
+      const a = luminance(tokens[fg]),
+        b = luminance(tokens[bg]);
+      const ratio = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+      assert.ok(
+        ratio >= minimum,
+        `${fg} on ${bg}: ${ratio.toFixed(2)} < ${minimum}`,
+      );
+      contrastResults.push({
+        theme: await evaluate("document.documentElement.dataset.theme"),
+        foreground: fg,
+        background: bg,
+        ratio: Number(ratio.toFixed(2)),
+        minimum,
+      });
+    }
   };
   const idle = () =>
     waitFor(
@@ -74,6 +128,8 @@ export async function runSmokeTest(window, app, dialog) {
     assert.equal(initial.nodeAccess, "undefined");
     assert.equal(initial.info.platform, "win32");
     assert.equal(initial.data.onboardingCompleted, false);
+    assert.equal(initial.data.settings.theme, "dark");
+    await checkContrast();
     assert.equal(await evaluate("document.title"), "UniX");
     assert.equal(window.getTitle(), "UniX");
     assert.match(
@@ -96,6 +152,7 @@ export async function runSmokeTest(window, app, dialog) {
     await waitFor("document.querySelector('.dashboard-page')");
     await idle();
     assert.equal((await evaluate("window.unixApi.load()")).tasks.length, 0);
+    await capture("dashboard-empty");
     await button("Erste Aufgabe anlegen");
     await waitFor("document.querySelector('.task-form')");
     assert.equal(
@@ -124,6 +181,19 @@ export async function runSmokeTest(window, app, dialog) {
     );
     await fill(".task-form textarea", "Treffpunkt vor dem Haupteingang.");
     await capture("task-editor");
+    window.setSize(1040, 700);
+    await capture("task-editor-1040");
+    await evaluate(
+      "document.querySelector('.modal-panel').scrollTop = document.querySelector('.modal-panel').scrollHeight",
+    );
+    await capture("task-editor-1040-bottom");
+    assert.equal(
+      await evaluate(
+        "document.querySelector('.modal-actions button[type=submit]').getBoundingClientRect().bottom < innerHeight",
+      ),
+      true,
+    );
+    window.setSize(1440, 920);
     await evaluate("document.querySelector('.task-form').requestSubmit()");
     await waitFor("!document.querySelector('.task-form')");
     await idle();
@@ -189,6 +259,7 @@ export async function runSmokeTest(window, app, dialog) {
     await button("Hell");
     await idle();
     await capture("settings-light");
+    await checkContrast();
     const backupPath = join(directory, "roundtrip-backup.json");
     dialog.showSaveDialog = async () => ({
       canceled: false,
@@ -257,8 +328,62 @@ export async function runSmokeTest(window, app, dialog) {
     await idle();
     assert.equal((await evaluate("window.unixApi.load()")).tasks.length, 0);
 
+    // Design fixtures stay inside the isolated smoke directory, never real user data.
+    await evaluate(`(async () => {
+      const data = await window.unixApi.load();
+      const date = (offset) => { const d = new Date(); d.setDate(d.getDate() + offset); return [d.getFullYear(), String(d.getMonth()+1).padStart(2,'0'), String(d.getDate()).padStart(2,'0')].join('-'); };
+      const titles = ['Literaturrecherche abschließen', 'Übungsblatt 04 abgeben', 'Prüfungsvorbereitung: Algorithmen und Datenstrukturen', 'Mittagspause mit der Lerngruppe', 'Rückmeldung für das Wintersemester', 'Projektpräsentation vorbereiten und die Ergebnisse der gemeinsamen Fallstudie mit der Lerngruppe abschließend besprechen'];
+      data.profile = { name: 'Mina', university: 'Technische Universität Berlin', studyProgram: 'Wirtschaftsinformatik', semester: '3. Semester' };
+      data.tasks = titles.map((title, i) => ({ id: crypto.randomUUID(), title, module: ['Wissenschaftliches Arbeiten', 'Statistik', 'Informatik', 'Campus', 'Studienorganisation', 'Projektseminar'][i], type: ['study','assignment','exam','dining','admin','assignment'][i], dueDate: date(i - 1), estimateMinutes: [45,90,120,30,15,60][i], priority: i === 0 ? 'high' : 'medium', status: 'open', notes: i === 5 ? 'Ergebnisse gemeinsam abgleichen.' : '', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }));
+      data.settings.theme = 'dark';
+      await window.unixApi.save(data);
+    })()`);
+    const designLoaded = once(window.webContents, "did-finish-load");
+    window.webContents.reload();
+    await designLoaded;
+    await waitFor("document.querySelectorAll('.task-row').length === 5");
+    await capture("dashboard-populated-dark");
+    window.setSize(1040, 700);
+    await capture("dashboard-populated-1040");
+    await button("Aufgaben");
+    await waitFor("document.querySelectorAll('.task-row').length === 6");
+    await capture("tasks-1040");
+    window.setSize(1440, 920);
+    await capture("tasks-dark");
+    window.webContents.setZoomFactor(2);
+    await capture("tasks-200-percent");
+    await click(".task-title-button");
+    await waitFor("document.querySelector('.task-form')");
+    await evaluate(
+      "document.querySelector('.modal-panel').scrollTop = document.querySelector('.modal-panel').scrollHeight",
+    );
+    await capture("task-editor-200-percent");
+    assert.equal(
+      await evaluate(
+        "document.querySelector('.modal-actions button[type=submit]').getBoundingClientRect().bottom < innerHeight",
+      ),
+      true,
+    );
+    await button("Abbrechen");
     await button("Einstellungen");
     await waitFor("document.querySelector('.settings-page')");
+    await capture("settings-200-percent");
+    window.webContents.setZoomFactor(1);
+    await button("Hell");
+    await idle();
+    await button("Heute");
+    await waitFor("document.querySelector('.dashboard-page')");
+    await capture("dashboard-populated-light");
+    await button("Aufgaben");
+    await waitFor("document.querySelector('.semester-page')");
+    await capture("tasks-light");
+    await fill(".search-field input", "no-result-12345");
+    await waitFor("document.querySelector('.empty-panel')");
+    await capture("tasks-no-results");
+
+    await button("Einstellungen");
+    await waitFor("document.querySelector('.settings-page')");
+    await evaluate("window.confirm = () => true; true");
     await button("UniX zurücksetzen");
     await waitFor("document.querySelector('.onboarding-form')");
     assert.equal(
@@ -282,6 +407,9 @@ export async function runSmokeTest(window, app, dialog) {
       unsavedWindowClose: true,
       reset: true,
       themes: true,
+      contrastResults,
+      zoom200Percent: true,
+      longTitlesAndEmptyStates: true,
       layouts: ["1440x920", "1040x700"],
       failures,
     };
