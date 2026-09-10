@@ -1,0 +1,20 @@
+import { spawn } from "node:child_process";
+import { mkdtemp, mkdir, readFile } from "node:fs/promises";
+import { join, resolve } from "node:path";
+import assert from "node:assert/strict";
+import electron from "electron";
+
+await mkdir(".runtime", { recursive: true });
+const dataDirectory = await mkdtemp(resolve(".runtime", "desktop-smoke-"));
+const packaged = process.argv.includes("--packaged");
+const executable = packaged ? resolve("release/win-unpacked/UniX.exe") : electron;
+const env = { ...process.env, UNIX_SMOKE_DIRECTORY: dataDirectory };
+delete env.ELECTRON_RUN_AS_NODE;
+delete env.VITE_DEV_SERVER_URL;
+const child = spawn(executable, [...(packaged ? [] : ["."]), "--unix-smoke-test"], { env, stdio: "inherit", windowsHide: true });
+const code = await new Promise((resolveExit, reject) => { child.on("error", reject); child.on("exit", resolveExit); });
+assert.equal(code, 0, "Desktop test process failed");
+const report = JSON.parse(await readFile(join(dataDirectory, "smoke-result.json"), "utf8"));
+assert.equal(report.passed, true);
+assert.equal(report.packaged, packaged);
+console.log(`Desktop smoke verified: ${dataDirectory}`);
