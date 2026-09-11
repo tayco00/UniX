@@ -1,14 +1,13 @@
 import { useState, type FormEvent } from "react";
 import type { Priority, Task, TaskType } from "../domain/model";
-import { priorityLabels, taskTypeLabels, todayKey } from "../domain/tasks";
+import { localDateKey, priorityLabels, taskTypeLabels } from "../domain/tasks";
 
 export type TaskDraft = Omit<Task, "id" | "status" | "createdAt" | "updatedAt">;
-
-const emptyDraft = (): TaskDraft => ({
+const initialDraft = (): TaskDraft => ({
   title: "",
-  module: "",
+  course: "",
   type: "assignment",
-  dueDate: todayKey(),
+  dueDate: localDateKey(),
   estimateMinutes: 60,
   priority: "medium",
   notes: "",
@@ -16,62 +15,61 @@ const emptyDraft = (): TaskDraft => ({
 
 export function TaskEditor({
   task,
-  onCancel,
   onSave,
+  onCancel,
+  onDelete,
   onDirty,
 }: {
   task?: Task;
-  onCancel: () => void;
   onSave: (draft: TaskDraft) => void;
+  onCancel: () => void;
+  onDelete?: () => void;
   onDirty: (dirty: boolean) => void;
 }) {
   const [draft, setDraft] = useState<TaskDraft>(
     task
       ? {
           title: task.title,
-          module: task.module,
+          course: task.course,
           type: task.type,
           dueDate: task.dueDate,
           estimateMinutes: task.estimateMinutes,
           priority: task.priority,
           notes: task.notes,
         }
-      : emptyDraft(),
+      : initialDraft(),
   );
   const [initial] = useState(draft);
-  const [validation, setValidation] = useState("");
-  function update(next: TaskDraft) {
+  const [error, setError] = useState("");
+  const update = (next: TaskDraft) => {
     setDraft(next);
+    setError("");
     onDirty(JSON.stringify(next) !== JSON.stringify(initial));
-    setValidation("");
-  }
-
-  function submit(event: FormEvent) {
+  };
+  const submit = (event: FormEvent) => {
     event.preventDefault();
     if (!draft.title.trim()) {
-      setValidation(
-        "Bitte gib der Aufgabe einen Titel. Leerzeichen allein genügen nicht.",
-      );
+      setError("Bitte gib der Aufgabe einen Titel.");
       return;
     }
     onSave({
       ...draft,
       title: draft.title.trim(),
-      module: draft.module.trim(),
+      course: draft.course.trim(),
       notes: draft.notes.trim(),
     });
-  }
-
+  };
   return (
-    <form className="task-form" onSubmit={submit}>
-      {validation && (
-        <p className="error-notice field-wide" role="alert">
-          {validation}
+    <form className="task-form" onSubmit={submit} noValidate>
+      {error && (
+        <p className="notice error field-wide" role="alert">
+          {error}
         </p>
       )}
       <label className="field field-wide">
-        <span>Aufgabe</span>
+        <span>Titel</span>
         <input
+          autoFocus
           maxLength={140}
           value={draft.title}
           onChange={(event) => update({ ...draft, title: event.target.value })}
@@ -83,8 +81,8 @@ export function TaskEditor({
         <span>Modul oder Bereich</span>
         <input
           maxLength={100}
-          value={draft.module}
-          onChange={(event) => update({ ...draft, module: event.target.value })}
+          value={draft.course}
+          onChange={(event) => update({ ...draft, course: event.target.value })}
           placeholder="z. B. Statistik"
         />
       </label>
@@ -116,30 +114,29 @@ export function TaskEditor({
           required
         />
       </label>
-      <div className="field">
-        <label htmlFor="task-estimate">Aufwand in Minuten</label>
+      <label className="field">
+        <span>Aufwand in Minuten</span>
         <input
-          id="task-estimate"
           type="number"
           min={0}
           max={1440}
           step={1}
-          required
           value={
             Number.isNaN(draft.estimateMinutes) ? "" : draft.estimateMinutes
           }
           onChange={(event) =>
             update({ ...draft, estimateMinutes: event.target.valueAsNumber })
           }
+          required
         />
-      </div>
-      <fieldset className="field field-wide priority-field">
+      </label>
+      <fieldset className="field field-wide priority">
         <legend>Priorität</legend>
-        <div className="segmented-control">
+        <div>
           {(Object.keys(priorityLabels) as Priority[]).map((priority) => (
             <button
-              type="button"
               key={priority}
+              type="button"
               className={draft.priority === priority ? "active" : ""}
               aria-pressed={draft.priority === priority}
               onClick={() => update({ ...draft, priority })}
@@ -155,22 +152,24 @@ export function TaskEditor({
         </span>
         <textarea
           maxLength={2000}
-          rows={4}
+          rows={3}
           value={draft.notes}
           onChange={(event) => update({ ...draft, notes: event.target.value })}
-          placeholder="Links, Teilaufgaben oder eine kurze Erinnerung"
+          placeholder="Details, Links oder Teilaufgaben"
         />
       </label>
       <footer className="modal-actions">
-        <button
-          type="button"
-          className="button button-quiet"
-          onClick={onCancel}
-        >
+        {onDelete && (
+          <button type="button" className="danger-link" onClick={onDelete}>
+            Aufgabe löschen
+          </button>
+        )}
+        <span />
+        <button type="button" className="button secondary" onClick={onCancel}>
           Abbrechen
         </button>
-        <button type="submit" className="button button-primary">
-          {task ? "Änderungen speichern" : "Aufgabe anlegen"}
+        <button type="submit" className="button primary">
+          {task ? "Speichern" : "Aufgabe anlegen"}
         </button>
       </footer>
     </form>

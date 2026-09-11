@@ -1,66 +1,33 @@
-# UniX Roadmap
+# UniX – Meilensteine
 
-## M0 — Produktfundament (implementiert; Abnahmen siehe Prüfkatalog)
+Stand: 11. September 2026. Jeder Meilenstein beginnt erst nach Abschluss seines Vorgängers. Nicht gebaute Module erscheinen nicht in der App-Navigation.
 
-- Audit des früheren Projekts
-- Stack- und Architekturentscheidung
-- 108 interne Abnahmekriterien
-- Designsystem, Datenvertrag, Desktop-Brücke, Tests und Packaging
+## M0 – Neustart und Produktvertrag
 
-## M1 — Aufgabenverwaltung (jetzt lauffähig)
+Status: abgeschlossen. Das frühere lokale Projekt wurde entfernt, der Git-Verlauf aus dem bestehenden öffentlichen Repository neu geklont und Ruflo 3.41.2 projektbezogen initialisiert. Nutzerfeedback liegt sowohl in Ruflos lokalem Projektgedächtnis als auch in der Abnahmematrix. Produktname, Scope, Datenmigration, Architektur und helle Gestaltung sind festgelegt.
 
-- Ersteinrichtung ohne Konto
-- Persönliche Heute-Ansicht
-- Aufgaben und Fristen anlegen, bearbeiten, erledigen, wieder öffnen, löschen
-- Suche und Statusfilter
-- Hell/Dunkel/System-Darstellung
-- Local-first-Persistenz, Backup, Import und Reset
-- Windows-Start/Stop-Skripte und NSIS-Build
+Gate: nachvollziehbare Ruflo-Integration, 120 Kriterien, keine globale oder Cloud-Konfiguration, alter Git-Stand wiederherstellbar.
 
-Exit: 10–15 Studierende verwenden UniX vier Wochen; mindestens 50 % öffnen es an zwei Tagen pro Woche. Kritische Datenverluste: null.
+## M1 – Nutzbarer Studienplaner
 
-## M1.1 — UX-Härtung (0.2.0 implementiert)
+Status: abgeschlossen. Enthält Ersteinrichtung, Tagesfokus, Aufgaben mit fünf Arten einschließlich Mensa/Cafétaria, Filter, Suche, Profil, Sicherung, Wiederherstellung und Reset. Windows-App, Installer, Start/Stop und Migration der bisherigen UniX-Daten gehören zum Lieferumfang.
 
-- Keine funktionslosen Navigationseinträge, keine Speicher-Werbetexte, keine automatischen Beispielaufgaben
-- Bestätigte statt optimistischer Speicherung; fehlgeschlagene Versuche wiederholbar
-- Schutz ungespeicherter Eingaben, Tastaturfokus im Dialog, lesbare Texte und kleine Fenster
-- Korrekte Kalenderwoche, Tageszeitbegrüßung und Statusdarstellung erledigter Aufgaben
-- Abgesicherter Sicherungsimport, Wiederherstellung aus Startfehlern und Rücksetzen beider Dateigenerationen
-- Erweiterte Nutzerablauf- und native Desktop-Tests, einschließlich Fehler- und Abbruchpfaden
+Gate: 120/120 Kriterien belegt, automatisierte Tests sowie native Probeläufe für Quell- und Paket-Build bestanden, GitHub-Release veröffentlicht.
 
-Vor breitem Rollout weiter offen: Installer/Upgrade/Deinstallation auf einem frischen zweiten Windows-Gerät, Code Signing, Screenreader-/Hochkontrastprüfung, reale Pilotnutzung. Die funktionale MVP-Prüfung ersetzt diese Freigaben nicht.
+## M2 – CampusGig
 
-## M1.2 — Beschriftungen und Aufgabenart (0.2.1)
+Status: geplant. Kleine bezahlte Hilfen zwischen verifizierten Studierenden. Vor Umsetzung werden Moderation, Missbrauchsmeldungen, Haftung, Identitätsprüfung und Zahlungsgrenzen mit Pilotnutzern validiert.
 
-- „Mensa/Cafétaria“ als zusätzliche Aufgabenart, einschließlich Speichern, Bearbeiten und Sicherungen
-- Einheitliche Feldhinweise „(optional)“ und entfernter Aufwand-Zusatz
-- Sichtbarer Produktname „UniX“ ohne Namenszusätze; neutraler Menüpunkt „Aufgaben“
+Gate: getesteter Problem-/Lösungsfit, Moderationskonzept, Datenschutz- und Sicherheitsprüfung.
 
-## M2 — CampusGig Pilot
+## M3 – Marketplace
 
-- Verifizierter Hochschulkontext
-- Gig erstellen, finden, merken und schließen
-- Moderation, Melden, Sperren und Sicherheitsleitfaden vor Messaging
-- Optionaler Cloud-Sync hinter dem bestehenden Repository
+Status: geplant. Campusbezogene Angebote und Gesuche, erst nach belastbarer Identitäts- und Moderationsbasis aus M2.
 
-Exit: ein Campus, mindestens 50 veröffentlichte Gigs, 20 erfolgreiche Matches, dokumentierter Moderationsprozess.
+## M4 – StudyMatch
 
-## M3 — Marketplace und StudyMatch
+Status: geplant. Lernpartner und Gruppen über Hochschule, Modul, Zeitraum und bevorzugte Lernform.
 
-- Marketplace zunächst ohne integrierte Zahlung
-- StudyMatch nach Modul, Lernziel und Verfügbarkeit
-- Gemeinsames Vertrauensprofil, getrennte Privatsphäreneinstellungen
-- Suchindex und Sync-Konfliktlösung
+## M5 – SemesterMate, Cloud und Mobile
 
-Exit: Nutzung und Wiederkehr je Modul rechtfertigen die dauerhafte Produktpflege.
-
-## M4 — Erweiterte Studienplanung und Mobile
-
-- Kalenderimport mit expliziter Einwilligung
-- wiederkehrende Aufgaben und Benachrichtigungen
-- mobile Hülle mit wiederverwendeter Domäne
-- Ende-zu-Ende getestete Synchronisierung
-
-## Querschnitt pro Meilenstein
-
-Jedes Modul beginnt mit Problemvalidierung, Daten- und Missbrauchsmodell, leerem Zustand und drei Ende-zu-Ende-Abläufen. Erst danach wird die Navigation erweitert. Kein Modul geht live, solange Löschung, Export, Fehlerzustände, Accessibility und Telemetrieentscheidung ungeklärt sind.
+Status: geplant. Kalenderintegration, Benachrichtigungen und optionale Synchronisierung. Erst mit Account-, Konflikt- und Datenschutzkonzept. Mobile Clients teilen Domänenmodell und API-Verträge, nicht die Electron-Hülle.

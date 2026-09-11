@@ -1,72 +1,39 @@
-# Prüfprotokoll 0.3.0
+# Prüfprotokoll
 
-Stand: 10. September 2026. Windows 11 x64, Node.js 24.14.1. Der Prüfstand gilt für die verfügbare Aufgabenverwaltung, nicht für eine breite Produktionsfreigabe oder künftige Campus-Module.
+Stand: 11. September 2026 · UniX 0.4.0
 
-| Prüfung | Ergebnis |
-| --- | --- |
-| Typprüfung und ESLint | bestanden |
-| Vitest | 54 Tests in 4 Dateien bestanden |
-| Produktions-Renderer | Vite-Build erfolgreich; JavaScript ca. 344 kB, gzip ca. 104 kB |
-| Nativer Entwicklungs-Build | vollständiger unten beschriebener Ablauf bestanden |
-| Gepackte Windows-EXE | Ablauf mit `app.isPackaged = true` bestanden |
-| Windows-Paket | `UniX-0.3.0-Setup.exe` erstellt; EXE meldet 0.3.0.0 |
-| Desktop-Verknüpfung | auf aktualisierte Projekt-EXE eingerichtet |
-| Start / Doppelstart / Stop | sichtbares Fenster, dieselbe Instanz beim Doppelstart, vollständiges reguläres Beenden und erneuter Stop bei beendeter App bestanden |
-| Abhängigkeiten | npm meldet 0 bekannte Schwachstellen zum Prüfzeitpunkt |
-| Abnahmematrix | 108 Kriterien: 53 durch ausgeführte Prüfungen, 54 durch Code-/Dokumentprüfung, 1 Pilot-Abnahme offen |
+Dieses Protokoll wird mit dem Release abgeschlossen. Es trennt schnelle Codeprüfungen von echten Desktop-Abläufen und dokumentiert bekannte Grenzen.
 
-## Redesign 0.3.0
+## Automatisierte Ebenen
 
-- Komplette dunkelgrüne Gestaltung in Einrichtung, Navigation, Tagesübersicht, Aufgabenliste, Einstellungen, Dialogen und App-Symbol. Zusätzlich eine abgestimmte helle Darstellung.
-- Statistiken als kompakte Zeile statt vier Einzelkarten; Fortschrittsring und redundante Kontextkarte entfernt. Aufgaben und Formulare bleiben der Schwerpunkt.
-- 28 Farbkontrast-Paarungen gegen die ausgelieferten CSS-Tokens bestanden. Geprüfte Texte erreichen mindestens 4,5:1; Eingaberänder mindestens 3:1. Die Messwerte stehen im nativen Laufprotokoll.
-- Native Screenshots mit leeren Zuständen, sechs Testaufgaben, langem Titel und erfolgloser Suche. Ansichten bei 1.040 × 700 und 1.440 × 920 ohne horizontales Überlaufen; Dialogaktionen nach Scrollen erreichbar.
-- Aufgabenliste, Einstellungen und Dialog bei 200 % Renderer-Zoom geprüft. Das ersetzt keine Prüfung aller Windows-Skalierungen oder Screenreader.
-- Erfolgsmeldungen verdecken bei geöffnetem Editor keine Formularaktionen und fangen keine Klicks ab; zusätzlicher Regressionstest.
-- Neue Profile starten dunkel; Schema-Test erhält ausdrücklich gespeicherte Werte für Hell, Dunkel und System. Kein Wechsel des bestehenden Datenpfads oder der App-ID.
-- Abschließender Start-/Doppelstart-/Stop-Probelauf mit der gebauten EXE bestanden. Prüfsumme der tatsächlichen Nutzerdatendatei vor und nach diesem Ablauf identisch.
-- Beide abschließenden nativen Läufe bestanden: Entwicklung `.runtime/desktop-smoke-aEzh4H`, gepackte EXE `.runtime/desktop-smoke-mddrtS`. Die vollständigen Protokolle und Screenshots bleiben in diesen ignorierten Projektverzeichnissen. Drei ausgewählte Bilder unter `docs/screenshots/` zeigen ausschließlich Testdaten.
+| Ebene | Inhalt | Soll |
+| --- | --- | --- |
+| Typen | vollständige TypeScript-Prüfung ohne Ausgabe | bestanden |
+| Code-Regeln | UI-, Test-, Desktop- und Skriptdateien | bestanden |
+| Komponenten und Domäne | Ersteinrichtung, Aufgaben, Suche, Filter, Fehlerpfade, Migration, Speicherung | 47 Tests bestanden |
+| Quell-Desktop | echter Electron-Prozess mit isoliertem Datenordner | bestanden |
+| Paket-Desktop | identischer Ablauf mit der gebauten `UniX.exe` | bestanden |
+| Abnahmematrix | Anzahl, eindeutige IDs, zehn Kategorien und kein offener Status | 120/120 bestanden |
+| Abhängigkeiten | npm-Prüfung auf bekannte Schwachstellen | 0 bekannte Schwachstellen |
 
-Die Tests haben keine Daten in die persönliche Aufgabenliste übernommen. Gestaltung und Grenzen sind in [design.md](design.md) beschrieben.
+## Geprüfter Desktop-Ablauf
 
-## Ergänzungen in 0.2.1
+Der native Ablauf richtet ein Profil ein, prüft den leeren Zustand, legt eine Aufgabe der Art Mensa/Cafétaria an, startet neu, bearbeitet die Aufgabe, erledigt und öffnet sie wieder, verwendet Suche und Filter, exportiert und importiert eine Sicherung, prüft den Schutz ungespeicherter Eingaben, lädt einen größeren Beispieldatensatz und setzt UniX zurück.
 
-- Neue Art „Mensa/Cafétaria“ (`dining`) in Auswahl, Speicherung, Bearbeitung und Sicherungen geprüft; die bisherigen vier Arten bleiben gültig.
-- Native Fenster- und Dokumenttitel lauten exakt „UniX“; die Verknüpfung zeigt „UniX“ ohne Namenszusatz. Die tatsächliche EXE meldet Version 0.2.1.0.
-- Alle drei optionalen Feldhinweise in Einrichtung, Aufgabenformular und Profil stehen in Klammern.
-- Zusatz unter „Aufwand in Minuten“ und zugehöriger Accessibility-Verweis entfernt. Die bestehenden Eingabegrenzen bleiben unverändert.
-- Visuelle Prüfung des Aufgabenformulars mit ausgewählter neuer Art. Der native Probelauf verwendet `dining` auch über Neuladen, Bearbeiten und Sicherungs-Rundlauf hinweg.
+Zusätzlich werden Mindestfenstergröße, lange Titel, Tastaturfokus, Kontrastpaare, 200-%-Zoom, blockierte Navigation, verweigerte Berechtigungen, Einzelinstanz, Persistenz und reguläres Beenden geprüft. Screenshots werden während des Laufs erzeugt und visuell kontrolliert.
 
-## Geprobte Nutzerabläufe
+## Testgrenzen
 
-- Ersteinrichtung mit persönlichen Angaben, ohne automatisch angelegte Aufgaben.
-- Aufgabe mit Titel, Bereich, Datum, Aufwand und Notiz anlegen; über die Desktop-Brücke in echte Dateien schreiben.
-- Neuladen der App und Wiederfinden derselben Aufgabe mit unveränderter ID.
-- Erledigen, im Erledigt-Filter finden, wieder öffnen, bearbeiten und löschen.
-- Hell-/Dunkel-Darstellung sowie Profilansicht.
-- Sicherung exportieren und einlesen, Import abbrechen, anderen Profilnamen wiederherstellen und fehlerhaftes JSON ohne Änderung am gültigen Datenbestand zurückweisen.
-- Fensterschließen mit ungespeichertem Profil: Warnung auslösen, Abbruch wählen, Fenster und Eingaben bleiben erhalten.
-- Reset zurück zur Ersteinrichtung.
-- Native Screenshots bei 1.440 × 920 und 1.040 × 700 einschließlich Prüfung auf horizontales Überlaufen; vertikales Scrollen ist zulässig.
+- Der Installer ist nicht digital signiert; dadurch ist ein Windows-SmartScreen-Hinweis möglich.
+- Der automatisierte Lauf prüft Windows x64 auf dem Entwicklungs-PC. Andere Windows-Hardware und Hilfstechnologien benötigen zusätzlich reale Pilotnutzer.
+- Backup-Dialoge werden im nativen Test kontrolliert simuliert, damit keine beliebigen Nutzerdateien ausgewählt oder überschrieben werden.
+- CampusGig, Marketplace, StudyMatch und SemesterMate gehören nicht zu diesem Release und werden nicht vorgetäuscht.
+- Cloud, Accounts, Benachrichtigungen und Mehrgeräte-Konflikte sind nicht Teil dieses Meilensteins.
 
-Der native Test läuft vollständig in eigenen Verzeichnissen `.runtime/desktop-smoke-*`. Fenster, Renderer, Sandbox, IPC und Dateien sind echt. **Antworten der Datei- und Bestätigungsdialoge werden simuliert.** Das testet die Verarbeitung dieser Entscheidungen, nicht die manuelle Bedienung jedes Windows-Dateidialogs. Eine absichtlich ungültige Importdatei erzeugt eine erwartete Fehlermeldung im Testlog; geprüft wird dabei, dass das Produkt einen verständlichen Fehler anzeigt und die gültigen Daten nicht ersetzt.
+## Release-Nachweise
 
-Die App-Integrationstests ergänzen abgelehnte und verzögerte Schreiboperationen, Doppelklickschutz, erneutes Speichern eines erhaltenen Entwurfs, Tastaturfokus und Escape, Navigation mit Entwurf, Importabbruch und Profilaktualisierung, Exportfehler, Resetfehler, Pflichtfeldvalidierung und Suche/Paginierung mit 125 Aufgaben. Dateispeichertests prüfen unter anderem atomare Schreibfolgen, konkurrierende Zugriffe, beschädigte Haupt-/Sicherungsdateien, die 64-MiB-Importgrenze und das Verhindern einer Wiederkehr zurückgesetzter Daten.
-
-## Gefundene und korrigierte Probleme
-
-- Erfolgsanzeige vor Abschluss des Speicherns; Editor schloss auch bei Speicherfehlern.
-- Risiko doppelter Eingaben und irreführende Erfolgsmeldungen bei fehlgeschlagenen Dateioperationen.
-- Entwurfsverlust bei Dialog-, Ansichts- oder Fensterschließen; instabiler Fokus und fehlende Fokusbegrenzung.
-- Ungefragte Beispielaufgaben, falsche Zwei-Schritte-Anzeige, funktionslose Zukunftsmodule und technische Werbetexte.
-- Rollierendes Acht-Tage-Fenster als „diese Woche“, unpassende Tageszeitbegrüßung und überfällige Beschriftung erledigter Aufgaben.
-- Aufwand-Auswahl konnte gültige Werte aus Sicherungen nicht korrekt bearbeiten.
-- Profilfelder wurden nach Import nicht zuverlässig erneuert.
-- Unbemerkter Rückfall auf eine ältere Sicherung; Reset ließ alte Daten in der Wiederherstellungskopie zurück.
-- Zu kleine Hilfstexte, abgeschnittene Inhalte und unbeschränkte gleichzeitige Darstellung langer Aufgabenlisten.
-
-## Verbleibende Freigaben vor breitem Rollout
-
-Noch nicht nachgewiesen: Installation, Upgrade und Deinstallation auf einem frischen zweiten Windows-Gerät; vollständige Screenreader-, Hochkontrast-, DPI- und Lastprüfung; echte Pilotnutzung mit Studierenden. Der Installer ist nicht signiert. Es gibt keine Garantie für problemfreien Betrieb auf beliebiger Hardware und keinen Nachweis einer vollständigen Barrierefreiheit.
-
-CampusGig, Marketplace, StudyMatch, automatische Erinnerungen und Synchronisierung sind nicht Bestandteil dieses MVP. 108 Kriterien bedeuten weiterhin **nicht** 108 bestandene Funktionstests. Die Matrix ist ein nachvollziehbarer Prüfkatalog; weitere Geräte- und Nutzerprüfungen bleiben Voraussetzung für eine breite Freigabe.
+- Version und Tag: `0.4.0` / `v0.4.0`
+- Installer: `UniX-0.4.0-Setup.exe`
+- SHA-256: `c8ab3581ab1dc6b15410613b6d9d40b7ba4d1a678c7f4f9bb685ae0fde82149d`
+- Repository: <https://github.com/tayco00/UniX>
+- Release: <https://github.com/tayco00/UniX/releases/tag/v0.4.0>

@@ -1,227 +1,236 @@
-import { mkdir, open, rename, rm } from "node:fs/promises";
+import { constants } from "node:fs";
+import { access, copyFile, mkdir, open, rename, rm } from "node:fs/promises";
 import { dirname } from "node:path";
-import { randomUUID } from "node:crypto";
 
-const DATA_VERSION = 1;
-const MAX_FILE_BYTES = 64 * 1024 * 1024;
+const allowedTypes = new Set([
+  "exam",
+  "assignment",
+  "study",
+  "organization",
+  "dining",
+]);
+const allowedPriorities = new Set(["low", "medium", "high"]);
+const allowedStatuses = new Set(["open", "done"]);
+const maxBytes = 64 * 1024 * 1024;
 
-export function createEmptyData() {
-  return {
-    version: DATA_VERSION,
-    onboardingCompleted: false,
-    profile: {
-      name: "",
-      university: "",
-      studyProgram: "",
-      semester: "",
-    },
-    tasks: [],
-    settings: {
-      theme: "dark",
-      weekStartsOn: 1,
-    },
-    updatedAt: new Date().toISOString(),
-  };
-}
+export const emptyData = () => ({
+  version: 2,
+  setupCompleted: false,
+  profile: { firstName: "", university: "", courseOfStudy: "", semester: "" },
+  tasks: [],
+  updatedAt: new Date().toISOString(),
+});
 
-function isString(value, max = 5000) {
-  return typeof value === "string" && value.length <= max;
-}
-
-function isCalendarDate(value) {
-  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value))
-    return false;
-  const parsed = new Date(`${value}T00:00:00.000Z`);
+function text(value, maximum, required = false) {
   return (
-    Number.isFinite(parsed.getTime()) &&
-    parsed.toISOString().slice(0, 10) === value
+    typeof value === "string" &&
+    value.length <= maximum &&
+    (!required || value.trim().length > 0)
   );
 }
 
-export function isValidData(value) {
-  if (!value || typeof value !== "object" || value.version !== DATA_VERSION)
-    return false;
-  if (typeof value.onboardingCompleted !== "boolean") return false;
-  if (!value.profile || !isString(value.profile.name, 80)) return false;
-  if (
-    !isString(value.profile.university, 120) ||
-    !isString(value.profile.studyProgram, 120)
-  )
-    return false;
-  if (!isString(value.profile.semester, 40)) return false;
-  if (
-    value.onboardingCompleted &&
-    ![
-      value.profile.name,
-      value.profile.university,
-      value.profile.studyProgram,
-    ].every((entry) => entry.trim().length > 0)
-  )
-    return false;
-  if (!Array.isArray(value.tasks) || value.tasks.length > 5000) return false;
-  if (
-    !value.settings ||
-    !["light", "dark", "system"].includes(value.settings.theme)
-  )
-    return false;
-  if (![0, 1].includes(value.settings.weekStartsOn)) return false;
-  if (!isString(value.updatedAt, 40)) return false;
+function dateKey(value) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return false;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return (
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day
+  );
+}
 
-  const identifiers = new Set();
-
+export function validate(value) {
+  if (
+    !value ||
+    typeof value !== "object" ||
+    value.version !== 2 ||
+    typeof value.setupCompleted !== "boolean"
+  )
+    return false;
+  const profile = value.profile;
+  if (
+    !profile ||
+    !text(profile.firstName, 80, value.setupCompleted) ||
+    !text(profile.university, 120, value.setupCompleted) ||
+    !text(profile.courseOfStudy, 120, value.setupCompleted) ||
+    !text(profile.semester, 40)
+  )
+    return false;
+  if (
+    !Array.isArray(value.tasks) ||
+    value.tasks.length > 5000 ||
+    !text(value.updatedAt, 100, true)
+  )
+    return false;
+  const ids = new Set();
   return value.tasks.every((task) => {
-    if (
-      !task ||
-      !isString(task.id, 80) ||
-      task.id.trim().length === 0 ||
-      identifiers.has(task.id)
-    )
-      return false;
-    identifiers.add(task.id);
-    return (
-      isString(task.title, 140) &&
-      task.title.trim().length > 0 &&
-      isString(task.module, 100) &&
-      ["exam", "assignment", "study", "admin", "dining"].includes(task.type) &&
-      isCalendarDate(task.dueDate) &&
+    const valid =
+      task &&
+      text(task.id, 100, true) &&
+      !ids.has(task.id) &&
+      text(task.title, 140, true) &&
+      text(task.course, 100) &&
+      allowedTypes.has(task.type) &&
+      dateKey(task.dueDate) &&
       Number.isInteger(task.estimateMinutes) &&
       task.estimateMinutes >= 0 &&
       task.estimateMinutes <= 1440 &&
-      ["low", "medium", "high"].includes(task.priority) &&
-      ["open", "done"].includes(task.status) &&
-      isString(task.notes, 2000) &&
-      isString(task.createdAt, 40) &&
-      isString(task.updatedAt, 40)
-    );
+      allowedPriorities.has(task.priority) &&
+      allowedStatuses.has(task.status) &&
+      text(task.notes, 2000) &&
+      text(task.createdAt, 100, true) &&
+      text(task.updatedAt, 100, true);
+    if (valid) ids.add(task.id);
+    return valid;
   });
 }
 
-export async function readValidated(filePath) {
-  const file = await open(filePath, "r");
+function migrate(value) {
+  if (validate(value)) return structuredClone(value);
+  if (
+    !value ||
+    value.version !== 1 ||
+    !value.profile ||
+    !Array.isArray(value.tasks)
+  )
+    throw Object.assign(new Error("Ungültige UniX-Daten"), {
+      code: "UNIX_INVALID_DATA",
+    });
+  const migrated = {
+    version: 2,
+    setupCompleted: value.onboardingCompleted === true,
+    profile: {
+      firstName:
+        typeof value.profile.name === "string"
+          ? value.profile.name.trim().split(/\s+/)[0]
+          : "",
+      university: value.profile.university ?? "",
+      courseOfStudy: value.profile.studyProgram ?? "",
+      semester: value.profile.semester ?? "",
+    },
+    tasks: value.tasks.map((task) => ({
+      ...task,
+      course: task.module ?? "",
+      type: task.type === "admin" ? "organization" : task.type,
+    })),
+    updatedAt: value.updatedAt ?? new Date().toISOString(),
+  };
+  if (!validate(migrated))
+    throw Object.assign(new Error("Ungültige UniX-Daten"), {
+      code: "UNIX_INVALID_DATA",
+    });
+  return migrated;
+}
+
+export async function readValidated(path) {
+  const handle = await open(path, "r");
   try {
-    if ((await file.stat()).size > MAX_FILE_BYTES) {
-      throw Object.assign(new Error("UniX-Datendatei ist zu groß"), {
+    const stats = await handle.stat();
+    if (stats.size > maxBytes)
+      throw Object.assign(new Error("Die Sicherung ist zu groß"), {
+        code: "UNIX_FILE_TOO_LARGE",
+      });
+    return migrate(JSON.parse(await handle.readFile("utf8")));
+  } catch (error) {
+    if (error instanceof SyntaxError)
+      throw Object.assign(new Error("Ungültige UniX-Datei"), {
         code: "UNIX_INVALID_DATA",
       });
-    }
-    let parsed;
-    try {
-      parsed = JSON.parse(await file.readFile("utf8"));
-    } catch (error) {
-      if (!(error instanceof SyntaxError)) throw error;
-      throw Object.assign(new Error("Ungültiges UniX-JSON"), {
-        code: "UNIX_INVALID_DATA",
-      });
-    }
-    if (!isValidData(parsed)) {
-      throw Object.assign(new Error("Ungültiges UniX-Datenschema"), {
-        code: "UNIX_INVALID_DATA",
-      });
-    }
-    return parsed;
+    throw error;
   } finally {
-    await file.close();
+    await handle.close();
   }
 }
 
-async function replaceAtomically(filePath, contents) {
-  const temporaryPath = `${filePath}.${process.pid}.${randomUUID()}.tmp`;
+async function exists(path) {
   try {
-    const file = await open(temporaryPath, "wx", 0o600);
-    try {
-      await file.writeFile(contents, "utf8");
-      await file.sync();
-    } finally {
-      await file.close();
-    }
-    // Rename replaces the destination; never delete the last good file first.
-    await rename(temporaryPath, filePath);
-  } finally {
-    await rm(temporaryPath, { force: true });
+    await access(path, constants.F_OK);
+    return true;
+  } catch {
+    return false;
   }
 }
 
 export class DataStore {
-  constructor(filePath) {
-    this.filePath = filePath;
-    this.backupPath = `${filePath}.backup`;
-    this.writeQueue = Promise.resolve();
-    this.recoveredFromBackup = false;
+  #path;
+  #backup;
+  #queue = Promise.resolve();
+  recoveredFromBackup = false;
+  constructor(path) {
+    this.#path = path;
+    this.#backup = `${path}.backup`;
   }
-
-  enqueue(operation) {
-    const pending = this.writeQueue.then(operation);
-    this.writeQueue = pending.catch(() => undefined);
-    return pending;
+  #serial(action) {
+    const next = this.#queue.then(action, action);
+    this.#queue = next.catch(() => undefined);
+    return next;
   }
-
   load() {
-    return this.enqueue(() => this.readOrRecover());
-  }
-
-  async readOrRecover() {
-    let primaryError;
-    try {
-      return await readValidated(this.filePath);
-    } catch (error) {
-      primaryError = error;
-    }
-
-    let backup;
-    try {
-      backup = await readValidated(this.backupPath);
-    } catch (backupError) {
-      if (primaryError?.code === "ENOENT" && backupError?.code === "ENOENT") {
-        const initial = createEmptyData();
-        await this.write(initial);
-        return initial;
-      }
-      throw new Error("Die UniX-Daten konnten nicht sicher gelesen werden.");
-    }
-    await this.write(backup, { preserveBackup: true });
-    this.recoveredFromBackup = true;
-    return backup;
-  }
-
-  async save(data) {
-    if (!isValidData(data)) throw new Error("Ungültiger UniX-Datensatz");
-    const snapshot = structuredClone(data);
-    return this.enqueue(() => this.write(snapshot));
-  }
-
-  async write(data, { preserveBackup = false } = {}) {
-    const contents = `${JSON.stringify(data, null, 2)}\n`;
-    if (Buffer.byteLength(contents, "utf8") > MAX_FILE_BYTES)
-      throw new Error("UniX-Datendatei ist zu groß");
-    await mkdir(dirname(this.filePath), { recursive: true });
-    if (!preserveBackup) {
-      let previous;
+    return this.#serial(async () => {
+      this.recoveredFromBackup = false;
+      if (!(await exists(this.#path))) return emptyData();
       try {
-        previous = await readValidated(this.filePath);
-      } catch (error) {
-        if (!["ENOENT", "UNIX_INVALID_DATA"].includes(error?.code)) throw error;
+        return await readValidated(this.#path);
+      } catch (mainError) {
+        if (!(await exists(this.#backup))) throw mainError;
+        const restored = await readValidated(this.#backup);
+        this.recoveredFromBackup = true;
+        return restored;
       }
-      if (previous)
-        await replaceAtomically(
-          this.backupPath,
-          `${JSON.stringify(previous, null, 2)}\n`,
-        );
-    }
-    await replaceAtomically(this.filePath, contents);
-    return data;
-  }
-
-  async reset() {
-    return this.enqueue(async () => {
-      const empty = createEmptyData();
-      await mkdir(dirname(this.filePath), { recursive: true });
-      // Reset both generations, so old tasks cannot reappear after a later recovery.
-      await replaceAtomically(
-        this.backupPath,
-        `${JSON.stringify(empty, null, 2)}\n`,
-      );
-      await this.write(empty, { preserveBackup: true });
-      return empty;
     });
+  }
+  save(value) {
+    return this.#serial(async () => {
+      const valid = migrate(value);
+      await mkdir(dirname(this.#path), { recursive: true });
+      if (await exists(this.#path)) {
+        try {
+          await readValidated(this.#path);
+          await copyFile(this.#path, this.#backup);
+        } catch {
+          /* never back up corrupt input */
+        }
+      }
+      const temporary = `${this.#path}.${process.pid}.${Date.now()}.tmp`;
+      const handle = await open(temporary, "wx");
+      try {
+        await handle.writeFile(`${JSON.stringify(valid, null, 2)}\n`, "utf8");
+        await handle.sync();
+      } finally {
+        await handle.close();
+      }
+      try {
+        await rename(temporary, this.#path);
+      } catch (error) {
+        await rm(temporary, { force: true });
+        throw error;
+      }
+      return valid;
+    });
+  }
+  reset() {
+    return this.#serial(async () => {
+      const fresh = emptyData();
+      await mkdir(dirname(this.#path), { recursive: true });
+      await rm(this.#backup, { force: true });
+      const temporary = `${this.#path}.${process.pid}.${Date.now()}.reset.tmp`;
+      await open(temporary, "wx").then(async (handle) => {
+        try {
+          await handle.writeFile(`${JSON.stringify(fresh, null, 2)}\n`);
+          await handle.sync();
+        } finally {
+          await handle.close();
+        }
+      });
+      await rename(temporary, this.#path);
+      return fresh;
+    });
+  }
+  drain() {
+    return this.#queue;
   }
 }

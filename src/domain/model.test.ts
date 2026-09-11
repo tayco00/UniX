@@ -1,71 +1,99 @@
 import { describe, expect, it } from "vitest";
 import {
   appDataSchema,
-  emptyAppData,
+  emptyData,
+  migrateData,
   taskSchema,
   taskTypeSchema,
 } from "./model";
 
-describe("data contracts", () => {
-  it("starts dark and preserves existing explicit theme preferences", () => {
-    expect(emptyAppData().settings.theme).toBe("dark");
-    for (const theme of ["system", "light", "dark"] as const) {
-      const data = {
-        ...emptyAppData(),
-        settings: { theme, weekStartsOn: 1 as const },
-      };
-      expect(appDataSchema.parse(data).settings.theme).toBe(theme);
-    }
-  });
-  it("accepts dining and all existing task types but rejects unknown types", () => {
-    for (const type of ["exam", "assignment", "study", "admin", "dining"]) {
-      expect(taskTypeSchema.parse(type)).toBe(type);
-    }
-    expect(() => taskTypeSchema.parse("unknown")).toThrow();
-  });
-  it("accepts the canonical empty state", () =>
-    expect(appDataSchema.parse(emptyAppData()).version).toBe(1));
-  it("rejects unknown data versions", () =>
+const validTask = {
+  id: "1",
+  title: "Lernen",
+  course: "",
+  type: "study" as const,
+  dueDate: "2026-09-11",
+  estimateMinutes: 60,
+  priority: "medium" as const,
+  status: "open" as const,
+  notes: "",
+  createdAt: "x",
+  updatedAt: "x",
+};
+
+describe("UniX data model", () => {
+  it("accepts the empty state", () =>
+    expect(appDataSchema.parse(emptyData()).version).toBe(2));
+  it.each(["exam", "assignment", "study", "organization", "dining"])(
+    "accepts task type %s",
+    (type) => expect(taskTypeSchema.parse(type)).toBe(type),
+  );
+  it("rejects unknown task types", () =>
+    expect(() => taskTypeSchema.parse("event")).toThrow());
+  it("requires profile fields after setup", () =>
     expect(() =>
-      appDataSchema.parse({ ...emptyAppData(), version: 2 }),
+      appDataSchema.parse({ ...emptyData(), setupCompleted: true }),
     ).toThrow());
-  it("rejects invalid themes", () =>
+  it("rejects more than 5000 tasks", () =>
+    expect(() =>
+      appDataSchema.parse({ ...emptyData(), tasks: Array(5001).fill(null) }),
+    ).toThrow());
+  it("rejects blank titles", () =>
+    expect(() =>
+      taskSchema.parse({
+        ...validTask,
+        title: " ",
+      }),
+    ).toThrow());
+  it("rejects effort beyond one day", () =>
+    expect(() =>
+      taskSchema.parse({
+        ...validTask,
+        estimateMinutes: 1441,
+      }),
+    ).toThrow());
+  it("rejects impossible calendar dates", () =>
+    expect(() =>
+      taskSchema.parse({ ...validTask, dueDate: "2026-02-30" }),
+    ).toThrow());
+  it("rejects duplicate task IDs", () =>
     expect(() =>
       appDataSchema.parse({
-        ...emptyAppData(),
-        settings: { theme: "neon", weekStartsOn: 1 },
+        ...emptyData(),
+        tasks: [validTask, { ...validTask }],
       }),
     ).toThrow());
-  it("rejects empty task titles", () =>
-    expect(() =>
-      taskSchema.parse({
-        id: "1",
-        title: "",
-        module: "",
-        type: "study",
-        dueDate: "2026-09-10",
-        estimateMinutes: 60,
-        priority: "medium",
-        status: "open",
-        notes: "",
-        createdAt: "now",
-        updatedAt: "now",
-      }),
-    ).toThrow());
-  it("rejects implausible task durations", () =>
-    expect(() =>
-      taskSchema.parse({
-        id: "1",
-        title: "Lernen",
-        module: "",
-        type: "study",
-        dueDate: "2026-09-10",
-        estimateMinutes: 1441,
-        priority: "medium",
-        status: "open",
-        notes: "",
-        createdAt: "now",
-        updatedAt: "now",
-      }),
-    ).toThrow());
+  it("migrates a previous UniX profile and task", () => {
+    const migrated = migrateData({
+      version: 1,
+      onboardingCompleted: true,
+      profile: {
+        name: "Mina Muster",
+        university: "TU Berlin",
+        studyProgram: "Informatik",
+        semester: "3",
+      },
+      tasks: [
+        {
+          id: "1",
+          title: "Rückmeldung",
+          module: "Studium",
+          type: "admin",
+          dueDate: "2026-09-12",
+          estimateMinutes: 10,
+          priority: "medium",
+          status: "open",
+          notes: "",
+          createdAt: "x",
+          updatedAt: "x",
+        },
+      ],
+      updatedAt: "x",
+    });
+    expect(migrated.profile.firstName).toBe("Mina");
+    expect(migrated.tasks[0]).toMatchObject({
+      course: "Studium",
+      type: "organization",
+    });
+  });
 });

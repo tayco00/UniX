@@ -1,47 +1,40 @@
 import {
-  appDataSchema,
-  emptyAppData,
+  emptyData,
+  migrateData,
+  parseData,
   type AppData,
-  type AppInfo,
 } from "../domain/model";
 
-const BROWSER_KEY = "unix-local-preview-v1";
+const key = "unix.v2";
 
-function browserRepository() {
-  return {
-    async load(): Promise<AppData> {
-      const raw = localStorage.getItem(BROWSER_KEY);
-      if (!raw) {
-        const initial = emptyAppData();
-        localStorage.setItem(BROWSER_KEY, JSON.stringify(initial));
-        return initial;
-      }
-      return appDataSchema.parse(JSON.parse(raw));
-    },
-    async save(data: AppData): Promise<AppData> {
-      const parsed = appDataSchema.parse(data);
-      localStorage.setItem(BROWSER_KEY, JSON.stringify(parsed));
-      return parsed;
-    },
-    async reset(): Promise<AppData> {
-      const initial = emptyAppData();
-      localStorage.setItem(BROWSER_KEY, JSON.stringify(initial));
-      return initial;
-    },
-    async exportBackup(): Promise<{ canceled: boolean; filePath?: string }> {
-      return { canceled: true };
-    },
-    async importBackup(): Promise<{ canceled: boolean; data?: AppData }> {
-      return { canceled: true };
-    },
-    async getAppInfo(): Promise<AppInfo> {
-      return {
-        version: "Browser-Vorschau",
-        dataPath: "Browser-Vorschau",
-        platform: "web",
-      };
-    },
-  };
-}
-
-export const repository = window.unixApi ?? browserRepository();
+export const repository = {
+  async load() {
+    if (window.unixApi) return migrateData(await window.unixApi.load());
+    const stored = localStorage.getItem(key);
+    return stored ? migrateData(JSON.parse(stored)) : emptyData();
+  },
+  async save(data: AppData) {
+    const valid = parseData(data);
+    if (window.unixApi) return migrateData(await window.unixApi.save(valid));
+    localStorage.setItem(key, JSON.stringify(valid));
+    return valid;
+  },
+  async reset() {
+    if (window.unixApi) return migrateData(await window.unixApi.reset());
+    localStorage.removeItem(key);
+    return emptyData();
+  },
+  async exportBackup() {
+    return window.unixApi ? window.unixApi.exportBackup() : { canceled: true };
+  },
+  async importBackup() {
+    return window.unixApi
+      ? window.unixApi.importBackup()
+      : { canceled: true as const };
+  },
+  async info() {
+    return window.unixApi
+      ? window.unixApi.getAppInfo()
+      : { version: "Vorschau", platform: "web", recoveredFromBackup: false };
+  },
+};

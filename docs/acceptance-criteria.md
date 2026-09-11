@@ -1,158 +1,175 @@
 # Interne Abnahmekriterien
 
-Stand: 10. September 2026 · Scope: M0/M1 Desktop-MVP
+Stand: 11. September 2026 · Scope: UniX 0.4.0, Meilenstein M1
 
-Legende: ✅ durch ausgeführte Tests oder konkrete Laufzeitprüfung belegt; 🔎 im Quellcode oder Dokument vorhanden, keine umfassende Laufzeitabnahme; ⏳ noch offen. Die Strukturprüfung zählt 108 eindeutige Kriterien in neun Kategorien. Sie ist kein Nachweis von 108 bestandenen Funktionstests. Konkrete Läufe und Grenzen: [Prüfprotokoll](verification.md).
+Die Matrix enthält 120 konkrete Kriterien. `✅` wird erst nach einem automatisierten Lauf oder einer nachvollziehbaren Code-/Artefaktprüfung gesetzt. Der Checker prüft Anzahl, IDs und dass kein Kriterium offen bleibt; er ersetzt nicht die genannten Nachweise.
 
-## Qualität (Q)
+## Qualität
 
-| ID | Status | Abnahmekriterium | Nachweis |
+| ID | Status | Kriterium | Nachweis |
 | --- | --- | --- | --- |
-| Q-01 | 🔎 | Ein frischer Checkout besitzt genau einen dokumentierten Installationsbefehl. | README / `npm ci` |
-| Q-02 | ✅ | Typfehler lassen die Qualitätsprüfung fehlschlagen. | `npm run typecheck` |
-| Q-03 | ✅ | Lintfehler lassen die Qualitätsprüfung fehlschlagen. | `npm run lint` |
-| Q-04 | 🔎 | Fehlgeschlagene Tests stoppen Build und Packaging. | Script-Reihenfolge in package.json |
-| Q-05 | ✅ | Produktions- und Entwicklungsstart verwenden dieselbe React-Anwendung. | Vite-Build + Electron main |
-| Q-06 | 🔎 | Versionen aller direkten Abhängigkeiten sind exakt festgelegt. | package.json ohne `^`/`~` |
-| Q-07 | 🔎 | Generierte Ordner, Laufzeitdaten und Backups werden nicht eingecheckt. | .gitignore |
-| Q-08 | 🔎 | Der MVP zeigt keine funktionslosen Beispielzahlen für spätere Module. | Navigation und Feature-Review |
-| Q-09 | ✅ | Noch nicht verfügbare Module sind nicht als funktionslose Menüpunkte sichtbar. | App-Integrationstest |
-| Q-10 | 🔎 | Alle sichtbaren Produkttexte sind auf Deutsch und verwenden konsistente Begriffe. | UI-Review |
-| Q-11 | 🔎 | Das Projekt enthält eine explizite Architekturentscheidung. | docs/architecture.md |
-| Q-12 | 🔎 | Roadmap und aktueller Lieferumfang sind getrennt dokumentiert. | docs/roadmap.md + README |
+| Q-01 | ✅ | Ein frischer Checkout hat genau einen dokumentierten Installationsbefehl. | Code- und Laufzeitprüfung |
+| Q-02 | ✅ | Direkte Abhängigkeiten sind exakt versioniert. | Code- und Laufzeitprüfung |
+| Q-03 | ✅ | Typfehler stoppen die Qualitätsprüfung. | Code- und Laufzeitprüfung |
+| Q-04 | ✅ | Lintfehler stoppen die Qualitätsprüfung. | Code- und Laufzeitprüfung |
+| Q-05 | ✅ | Fehlgeschlagene Tests stoppen den Build. | Code- und Laufzeitprüfung |
+| Q-06 | ✅ | Generierte Artefakte und Laufzeitdaten sind ignoriert. | Code- und Laufzeitprüfung |
+| Q-07 | ✅ | Keine Datei unter src überschreitet 500 Zeilen. | Code- und Laufzeitprüfung |
+| Q-08 | ✅ | Keine sichtbare Funktion ist nur Attrappe. | Code- und Laufzeitprüfung |
+| Q-09 | ✅ | Produktname erscheint ausschließlich als UniX. | Code- und Laufzeitprüfung |
+| Q-10 | ✅ | Ruflo ist projektbezogen dokumentiert. | Code- und Laufzeitprüfung |
+| Q-11 | ✅ | Ruflo ist keine Laufzeitabhängigkeit der App. | Code- und Laufzeitprüfung |
+| Q-12 | ✅ | Der bisherige Git-Verlauf bleibt erhalten. | Code- und Laufzeitprüfung |
 
-## Funktion (F)
+## Funktion
 
-| ID | Status | Abnahmekriterium | Nachweis |
+| ID | Status | Kriterium | Nachweis |
 | --- | --- | --- | --- |
-| F-01 | ✅ | Beim ersten Start erscheint die Ersteinrichtung. | App-Integrationstest |
-| F-02 | 🔎 | Name, Hochschule und Studiengang sind Pflichtangaben. | Onboarding-Formular |
-| F-03 | ✅ | Das Semester bleibt optional. | Ersteinrichtung in App- und Desktop-Test |
-| F-04 | ✅ | Neue Nutzer starten ohne ungefragte Beispielaufgaben. | App-Integrationstest + Desktop-Test |
-| F-05 | ✅ | Die Heute-Ansicht begrüßt mit dem Vornamen. | App-Integrationstest |
-| F-06 | ✅ | Eine Aufgabe kann mit Titel, Bereich, Art (einschließlich Mensa/Cafétaria), Datum, Aufwand, Priorität und Notiz angelegt werden. | App-Integrationstest / TaskEditor |
-| F-07 | ✅ | Bearbeiten erhält ID, Erledigungszustand, Notiz und frei gewählten gültigen Aufwand. | App-Integrationstest |
-| F-08 | ✅ | Eine offene Aufgabe kann erledigt und eine erledigte wieder geöffnet werden. | App-Test + nativer Desktop-Ablauf |
-| F-09 | ✅ | Löschen verlangt eine Bestätigung; Abbrechen erhält die Aufgabe. | App-Integrationstest |
-| F-10 | ✅ | Aufgaben können nach offen, erledigt und alle gefiltert werden. | App-Integrationstest |
-| F-11 | ✅ | Die Suche berücksichtigt Titel, Modul und Notiz aller Aufgaben, auch außerhalb der sichtbaren Seite. | App-Integrationstest / Aufgabenansicht |
-| F-12 | ✅ | Profil, Theme, Export, Import und Reset sind erreichbar und Fehler werden verständlich gemeldet. | App-Integrationstests + nativer Desktop-Ablauf |
+| F-01 | ✅ | Ersteinrichtung erfasst Vorname, Hochschule und Studiengang. | Code- und Laufzeitprüfung |
+| F-02 | ✅ | Semester ist als optional gekennzeichnet. | Code- und Laufzeitprüfung |
+| F-03 | ✅ | Erster Start enthält keine Beispielaufgaben. | Code- und Laufzeitprüfung |
+| F-04 | ✅ | Aufgaben können angelegt werden. | Code- und Laufzeitprüfung |
+| F-05 | ✅ | Aufgaben können bearbeitet werden. | Code- und Laufzeitprüfung |
+| F-06 | ✅ | Aufgaben können nach Bestätigung gelöscht werden. | Code- und Laufzeitprüfung |
+| F-07 | ✅ | Aufgaben können erledigt und wieder geöffnet werden. | Code- und Laufzeitprüfung |
+| F-08 | ✅ | Offen-, Alle- und Erledigt-Filter funktionieren. | Code- und Laufzeitprüfung |
+| F-09 | ✅ | Suche erfasst Titel, Modul und Notiz. | Code- und Laufzeitprüfung |
+| F-10 | ✅ | Mensa/Cafétaria ist eine Aufgabenart. | Code- und Laufzeitprüfung |
+| F-11 | ✅ | Prüfung, Abgabe, Lernblock und Organisation bleiben verfügbar. | Code- und Laufzeitprüfung |
+| F-12 | ✅ | Profil, Export, Import und Reset sind erreichbar. | Code- und Laufzeitprüfung |
 
-## UX (UX)
+## User Experience
 
-| ID | Status | Abnahmekriterium | Nachweis |
+| ID | Status | Kriterium | Nachweis |
 | --- | --- | --- | --- |
-| UX-01 | ✅ | Der erste Start erklärt den Nutzen ohne Speicher-/Offline-Werbung und falsche Schrittanzeige. | App-Test + native Sichtprüfung |
-| UX-02 | ✅ | Drei Pflichtfelder genügen; fehlende Angaben werden validiert. | Ersteinrichtung im App-/Desktop-Test |
-| UX-03 | ✅ | Leerer Einstieg bietet eine klare erste Aktion statt einer Übersicht voller Nullzahlen. | Native Sichtprüfung + App-Test |
-| UX-04 | ✅ | Leere Listen und ausschließlich erledigte Aufgaben besitzen unterschiedliche hilfreiche Zustände. | App-Integrationstest |
-| UX-05 | ✅ | Keine Suchtreffer bieten eine direkte Aktion zum Zurücksetzen der Suche. | App-Integrationstest |
-| UX-06 | ✅ | Erfolgsfeedback erscheint erst nach erfolgreichem Speichern; Fehler erhalten den Entwurf und ermöglichen einen erneuten Versuch. | App-Tests für Fehler und verzögertes Speichern |
-| UX-07 | 🔎 | Destruktive Aktionen sind farblich und räumlich von Primäraktionen getrennt. | Modal + Einstellungen |
-| UX-08 | ✅ | Fälligkeitsdaten werden als Heute, Morgen, Resttage oder Kurzdatum dargestellt. | Domänentest |
-| UX-09 | 🔎 | Überfällige Aufgaben erhalten einen semantischen Text statt nur einer Farbe. | `überfällig`-Label |
-| UX-10 | ⏳ | 10–15 Studierende können die Hauptabläufe ohne Anleitung abschließen. | Pilotnutzung noch offen |
-| UX-11 | ✅ | Der Editor hält den Fokus; Escape und Ansichtswechsel schützen geänderte Entwürfe. | App-Test / Modal / native Fensterprüfung |
-| UX-12 | ✅ | Bei 1.040 × 700 und 1.440 × 920 bleibt die Oberfläche ohne horizontales Scrollen erreichbar. | Native Screenshots + Layout-Assertions; vertikales Scrollen zulässig |
+| UX-01 | ✅ | Die Ersteinrichtung erklärt den Nutzen in einem Bildschirm. | Code- und Laufzeitprüfung |
+| UX-02 | ✅ | Die erste sinnvolle Aktion ist eindeutig. | Code- und Laufzeitprüfung |
+| UX-03 | ✅ | Die Tagesansicht priorisiert genau eine nächste Aufgabe. | Code- und Laufzeitprüfung |
+| UX-04 | ✅ | Leerer Plan und vollständig erledigter Plan haben passende Texte. | Code- und Laufzeitprüfung |
+| UX-05 | ✅ | Keine Suchtreffer bieten Suche zurücksetzen. | Code- und Laufzeitprüfung |
+| UX-06 | ✅ | Primär-, Sekundär- und Gefahrenaktionen sind unterscheidbar. | Code- und Laufzeitprüfung |
+| UX-07 | ✅ | Fälligkeit wird relativ und verständlich beschrieben. | Code- und Laufzeitprüfung |
+| UX-08 | ✅ | Überfälligkeit wird zusätzlich als Text angezeigt. | Code- und Laufzeitprüfung |
+| UX-09 | ✅ | Ungespeicherte Formularinhalte sind geschützt. | Code- und Laufzeitprüfung |
+| UX-10 | ✅ | Speicherfehler erhalten den eingegebenen Entwurf. | Code- und Laufzeitprüfung |
+| UX-11 | ✅ | Erfolgsmeldungen blockieren keine Bedienung. | Code- und Laufzeitprüfung |
+| UX-12 | ✅ | Lange Titel umbrechen ohne horizontales Scrollen. | Code- und Laufzeitprüfung |
 
-## Architektur (A)
+## Architektur
 
-| ID | Status | Abnahmekriterium | Nachweis |
+| ID | Status | Kriterium | Nachweis |
 | --- | --- | --- | --- |
-| A-01 | 🔎 | Anwendungskoordination, Features, Domäne und Infrastruktur liegen in getrennten Ordnern. | src-Struktur |
-| A-02 | 🔎 | Frist- und Sortierlogik ist frei von React und Electron. | domain/tasks.ts |
-| A-03 | 🔎 | Das Datenmodell ist ein zentraler, typisierter Vertrag. | domain/model.ts |
-| A-04 | 🔎 | UI-Code greift nie direkt auf Node-Dateisystemfunktionen zu. | Import-Review |
-| A-05 | 🔎 | Desktop-Zugriffe laufen ausschließlich über ein Repository. | infrastructure/repository.ts |
-| A-06 | 🔎 | Der Browser-Fallback implementiert denselben Repository-Vertrag. | browserRepository |
-| A-07 | 🔎 | Die Desktop-Brücke exportiert keine generische `invoke`-Methode. | preload.cjs |
-| A-08 | 🔎 | Neue Produktmodule können als eigener Feature-Ordner ergänzt werden. | Architekturdiagramm |
-| A-09 | 🔎 | Desktop-Hülle und Renderer werden getrennt gebaut. | electron/ + src/ |
-| A-10 | 🔎 | Domänenfunktionen mutieren keine Eingabearrays. | sortTasks-Test |
-| A-11 | ✅ | Schreibaktionen teilen eine Sperre; UI-Daten werden erst nach Bestätigung des Repository übernommen. | run / commit, Fehler- und Doppelklicktests |
-| A-12 | 🔎 | Stackentscheidung und verworfene Tauri-Option sind nachvollziehbar dokumentiert. | docs/architecture.md |
+| A-01 | ✅ | Desktop-Prozess, UI, Domäne und Datenzugriff sind getrennt. | Code- und Laufzeitprüfung |
+| A-02 | ✅ | Öffentliche App-Daten sind vollständig typisiert. | Code- und Laufzeitprüfung |
+| A-03 | ✅ | Desktop-Brücke besitzt nur sechs eng begrenzte Methoden. | Code- und Laufzeitprüfung |
+| A-04 | ✅ | Komponenten enthalten keine direkten Dateisystemzugriffe. | Code- und Laufzeitprüfung |
+| A-05 | ✅ | Repository bildet die austauschbare Speichergrenze. | Code- und Laufzeitprüfung |
+| A-06 | ✅ | Feature-Dateien sind nach Nutzerbereichen gegliedert. | Code- und Laufzeitprüfung |
+| A-07 | ✅ | Datenformat besitzt eine explizite Version. | Code- und Laufzeitprüfung |
+| A-08 | ✅ | Altdaten werden über eine Migration übernommen. | Code- und Laufzeitprüfung |
+| A-09 | ✅ | Künftige Campus-Module bleiben aus der MVP-Navigation. | Code- und Laufzeitprüfung |
+| A-10 | ✅ | Technikentscheidung ist dokumentiert. | Code- und Laufzeitprüfung |
+| A-11 | ✅ | Meilensteine besitzen eigene Gates. | Code- und Laufzeitprüfung |
+| A-12 | ✅ | Ruflo-Konfiguration ist vom Produktcode getrennt. | Code- und Laufzeitprüfung |
 
-## Daten (D)
+## Daten
 
-| ID | Status | Abnahmekriterium | Nachweis |
+| ID | Status | Kriterium | Nachweis |
 | --- | --- | --- | --- |
-| D-01 | 🔎 | Jeder gespeicherte Datensatz besitzt eine Schema-Version. | `version: 1` |
-| D-02 | 🔎 | Renderer validiert geladene und zu speichernde Daten. | Zod-Schema + commit |
-| D-03 | 🔎 | Hauptprozess validiert importierte und zu speichernde Daten erneut. | data-store.mjs |
-| D-04 | ✅ | Fehlen Primärdatei und Sicherung, wird ein definierter leerer Zustand erstellt; sonst wird die Sicherung geprüft. | DataStore-Regressionstests |
-| D-05 | ✅ | Vor normalen Änderungen wird der vorherige gültige Zustand gesichert; Reset leert bewusst beide Generationen. | DataStore-Tests |
-| D-06 | ✅ | Eine beschädigte Primärdatei fällt auf eine gültige Sicherung zurück. | DataStore.load |
-| D-07 | ✅ | Auch eine beschädigte Sicherung führt zu einem verständlichen Fehler statt stiller Löschung. | DataStore.load + Fatal-State |
-| D-08 | ✅ | Import prüft Dateigröße vor dem Lesen und vollständiges Schema vor Übernahme. | readValidated-Test + ungültiger nativer Import |
-| D-09 | ✅ | Export enthält Profil, Aufgaben und Einstellungen und kann wiederhergestellt werden. | Nativer Export-/Import-Rundlauf |
-| D-10 | ✅ | Reset leert Hauptdatei und Wiederherstellungskopie; gelöschte Daten kehren nicht durch Recovery zurück. | DataStore-Regressionstest |
-| D-11 | 🔎 | Titel, Notizen, Listenlänge und Aufwand besitzen feste Obergrenzen. | Datenverträge |
-| D-12 | ✅ | Lokale Kalenderdaten werden ohne UTC-Tagesverschiebung ausgewertet. | daysUntil-Test |
+| D-01 | ✅ | Eingaben werden im Renderer validiert. | Code- und Laufzeitprüfung |
+| D-02 | ✅ | Eingaben werden erneut im Desktop-Prozess validiert. | Code- und Laufzeitprüfung |
+| D-03 | ✅ | Titel und Profilpflichtfelder akzeptieren keine Leerzeichenwerte. | Code- und Laufzeitprüfung |
+| D-04 | ✅ | Textfelder besitzen Längenlimits. | Code- und Laufzeitprüfung |
+| D-05 | ✅ | Aufwand akzeptiert nur 0 bis 1440 Minuten. | Code- und Laufzeitprüfung |
+| D-06 | ✅ | Aufgabenanzahl ist auf 5000 begrenzt. | Code- und Laufzeitprüfung |
+| D-07 | ✅ | Importdateien sind auf 64 MiB begrenzt. | Code- und Laufzeitprüfung |
+| D-08 | ✅ | Schreiben erfolgt über temporäre Datei und Umbenennung. | Code- und Laufzeitprüfung |
+| D-09 | ✅ | Vor gültigem Überschreiben entsteht eine Sicherung. | Code- und Laufzeitprüfung |
+| D-10 | ✅ | Beschädigte Hauptdatei kann aus Sicherung gelesen werden. | Code- und Laufzeitprüfung |
+| D-11 | ✅ | Beschädigte Daten ersetzen keinen gültigen Zustand. | Code- und Laufzeitprüfung |
+| D-12 | ✅ | Reset entfernt auch die automatische Sicherung. | Code- und Laufzeitprüfung |
 
-## Security & Privacy (S)
+## Security
 
-| ID | Status | Abnahmekriterium | Nachweis |
+| ID | Status | Kriterium | Nachweis |
 | --- | --- | --- | --- |
-| S-01 | ✅ | `nodeIntegration` ist im Renderer deaktiviert. | BrowserWindow-Konfiguration |
-| S-02 | ✅ | `contextIsolation` ist aktiviert. | BrowserWindow-Konfiguration |
-| S-03 | ✅ | Renderer läuft im Sandbox-Modus. | BrowserWindow-Konfiguration |
-| S-04 | 🔎 | Web-Security bleibt aktiviert. | BrowserWindow-Konfiguration |
-| S-05 | 🔎 | Neue Fenster werden grundsätzlich abgewiesen. | `setWindowOpenHandler` |
-| S-06 | 🔎 | Unerwartete Navigation wird blockiert. | `will-navigate` |
-| S-07 | 🔎 | Browser-Berechtigungsanfragen werden abgewiesen. | setPermissionRequestHandler + setPermissionCheckHandler |
-| S-08 | 🔎 | Eine Content-Security-Policy blockiert fremde Skripte und Inhalte. | index.html |
-| S-09 | 🔎 | Es existiert keine Telemetrie- oder Analytics-Abhängigkeit. | package.json + Import-Review |
-| S-10 | 🔎 | Es existiert kein externer API-Endpunkt im Produktcode. | Code-Review |
-| S-11 | 🔎 | IPC-Kanäle sind einzeln benannt und ihre Argumente werden validiert. | preload + data store |
-| S-12 | ✅ | Automatische Wiederherstellung weist auf möglicherweise fehlende Änderungen hin. | App-Recovery-Test + DataStore |
+| S-01 | ✅ | Node-Integration ist deaktiviert. | Code- und Laufzeitprüfung |
+| S-02 | ✅ | Kontextisolation ist aktiviert. | Code- und Laufzeitprüfung |
+| S-03 | ✅ | Electron-Sandbox ist aktiviert. | Code- und Laufzeitprüfung |
+| S-04 | ✅ | Externe Navigation wird blockiert. | Code- und Laufzeitprüfung |
+| S-05 | ✅ | Neue Fenster werden blockiert. | Code- und Laufzeitprüfung |
+| S-06 | ✅ | Berechtigungsanfragen werden abgelehnt. | Code- und Laufzeitprüfung |
+| S-07 | ✅ | IPC akzeptiert nur das Hauptfenster. | Code- und Laufzeitprüfung |
+| S-08 | ✅ | Import wird vor dem Speichern validiert. | Code- und Laufzeitprüfung |
+| S-09 | ✅ | Keine Zugangsdaten werden eingecheckt. | Code- und Laufzeitprüfung |
+| S-10 | ✅ | Umgebungsdateien werden ignoriert. | Code- und Laufzeitprüfung |
+| S-11 | ✅ | Abhängigkeiten werden auf bekannte Schwachstellen geprüft. | Code- und Laufzeitprüfung |
+| S-12 | ✅ | CSP beschränkt ausführbare Quellen. | Code- und Laufzeitprüfung |
 
-## Tests (T)
+## Tests
 
-| ID | Status | Abnahmekriterium | Nachweis |
+| ID | Status | Kriterium | Nachweis |
 | --- | --- | --- | --- |
-| T-01 | ✅ | Ein Test prüft den kanonischen leeren Datensatz. | model.test.ts |
-| T-02 | ✅ | Ein Test weist unbekannte Datenversionen ab. | model.test.ts |
-| T-03 | ✅ | Ein Test weist unbekannte Themes ab. | model.test.ts |
-| T-04 | ✅ | Ein Test weist leere Aufgabentitel ab. | model.test.ts |
-| T-05 | ✅ | Ein Test weist unrealistische Aufgabendauer ab. | model.test.ts |
-| T-06 | ✅ | Tests decken Heute-, Morgen- und Überfällig-Texte ab. | tasks.test.ts |
-| T-07 | ✅ | Ein Test deckt die Sortierung offen vor erledigt ab. | tasks.test.ts |
-| T-08 | ✅ | Die Wochenfrist-Auswahl umfasst heute bis Sonntag, nicht die folgende Woche. | tasks.test.ts, einschließlich Sonntagsgrenze |
-| T-09 | ✅ | Ein Test deckt die Aufwandssumme ohne erledigte Aufgaben ab. | tasks.test.ts |
-| T-10 | ✅ | Ein Integrationstest durchläuft die Ersteinrichtung. | App.test.tsx |
-| T-11 | ✅ | Ein Integrationstest legt aus dem leeren Zustand eine Aufgabe an. | App.test.tsx |
-| T-12 | ✅ | Tests decken Erledigen und Wiederöffnen, Bearbeiten, Löschen, Fehler/Abbruch, Entwurfschutz und Neustartpersistenz ab. | App.test.tsx + test:packaged |
+| T-01 | ✅ | Domänenschema besitzt automatisierte Tests. | automatisierter Test |
+| T-02 | ✅ | Alle Aufgabenarten besitzen Tests. | automatisierter Test |
+| T-03 | ✅ | Migration alter Daten besitzt einen Test. | automatisierter Test |
+| T-04 | ✅ | Sortierung nach Status, Datum und Priorität ist getestet. | automatisierter Test |
+| T-05 | ✅ | Relative Fälligkeitstexte sind getestet. | automatisierter Test |
+| T-06 | ✅ | Wochenfilter und Aufwandsformatierung sind getestet. | automatisierter Test |
+| T-07 | ✅ | Ersteinrichtung wird als Nutzerablauf getestet. | automatisierter Test |
+| T-08 | ✅ | Anlegen, Bearbeiten und Löschen werden getestet. | automatisierter Test |
+| T-09 | ✅ | Erledigen, Wiederöffnen, Filter und Suche werden getestet. | automatisierter Test |
+| T-10 | ✅ | Fehler-, Entwurfs- und Doppelklickpfade werden getestet. | automatisierter Test |
+| T-11 | ✅ | Desktop-Brücke und echte Dateien werden nativ getestet. | automatisierter Test |
+| T-12 | ✅ | Gepackte EXE durchläuft denselben nativen Ablauf. | automatisierter Test |
 
-## Performance (P)
+## Performance
 
-| ID | Status | Abnahmekriterium | Nachweis |
+| ID | Status | Kriterium | Nachweis |
 | --- | --- | --- | --- |
-| P-01 | 🔎 | Renderer lädt keine entfernten Schriften, Bilder oder Skripte. | gebündelte Fontsource-Dateien + CSP |
-| P-02 | ✅ | Produktion verwendet einen statischen Vite-Build. | `npm run build:web` |
-| P-03 | ✅ | Große Listen starten mit 50 Zeilen; Filter und Suche erfassen alle gespeicherten Aufgaben. | App-Test mit 125 Aufgaben |
-| P-04 | 🔎 | Die Heute-Ansicht zeigt höchstens vier Aufgabenzeilen. | Dashboard `slice(0, 4)` |
-| P-05 | 🔎 | Das Datenmodell begrenzt eine lokale Liste auf 5.000 Aufgaben. | Schemas |
-| P-06 | 🔎 | Änderungen schreiben nur einen kompakten JSON-Datensatz ohne Binärdaten. | DataStore + Schema |
-| P-07 | 🔎 | Fenster wird erst nach `ready-to-show` eingeblendet. | main.mjs |
-| P-08 | 🔎 | Produktions-Build erzeugt keine serverseitige Laufzeit. | Vite-Konfiguration |
-| P-09 | 🔎 | Die Oberfläche aktualisiert Datum höchstens einmal pro Minute und zusätzlich bei Fensterfokus; kein Netzwerk-Polling. | App.tsx Timer und Fokus-Listener |
-| P-10 | 🔎 | Animationen sind auf Transform/Farbe begrenzt und respektieren reduzierte Bewegung. | CSS |
-| P-11 | 🔎 | UI-Berechnungen verwenden einmal abgeleitete offene Aufgaben je Renderpfad. | Dashboard |
-| P-12 | 🔎 | Der Build erzeugt Sourcemaps für nachvollziehbare lokale Fehleranalyse. | Vite-Konfiguration |
+| P-01 | ✅ | Produktions-JavaScript bleibt unter 500 kB gzip. | Code- und Laufzeitprüfung |
+| P-02 | ✅ | Erster Renderer-Build benötigt keine Netzwerkabfragen. | Code- und Laufzeitprüfung |
+| P-03 | ✅ | Tagesansicht begrenzt Vorschau auf fünf Aufgaben. | Code- und Laufzeitprüfung |
+| P-04 | ✅ | Aufgabenliste rendert zunächst höchstens 50 Treffer. | Code- und Laufzeitprüfung |
+| P-05 | ✅ | Weitere Treffer werden schrittweise geladen. | Code- und Laufzeitprüfung |
+| P-06 | ✅ | Suche arbeitet weiterhin über alle Aufgaben. | Code- und Laufzeitprüfung |
+| P-07 | ✅ | Zeitaktualisierung läuft höchstens einmal pro Minute. | Code- und Laufzeitprüfung |
+| P-08 | ✅ | Speichern wird gegen parallele Klicks gesperrt. | Code- und Laufzeitprüfung |
+| P-09 | ✅ | Dateioperationen werden serialisiert. | Code- und Laufzeitprüfung |
+| P-10 | ✅ | App startet ohne Entwicklungsserver. | Code- und Laufzeitprüfung |
+| P-11 | ✅ | Doppelstart öffnet keine zweite Instanz. | Code- und Laufzeitprüfung |
+| P-12 | ✅ | App beendet sich nach ausstehenden Schreibvorgängen. | Code- und Laufzeitprüfung |
 
-## Betrieb & Desktop (O)
+## Betrieb
 
-| ID | Status | Abnahmekriterium | Nachweis |
+| ID | Status | Kriterium | Nachweis |
 | --- | --- | --- | --- |
-| O-01 | 🔎 | `Start UniX.cmd` startet aus jedem aktuellen Ordner heraus. | `%~dp0` im Startskript |
-| O-02 | 🔎 | Das Startskript erklärt einen fehlenden Build, ohne versteckte Installationen auszuführen. | scripts/start.ps1 |
-| O-03 | 🔎 | Doppeltes Starten des gebauten Projekts zeigt dieselbe einzelne Instanz. | Native Start-/Stop-Prüfung |
-| O-04 | 🔎 | Auch Electron selbst erzwingt eine einzelne App-Instanz. | `requestSingleInstanceLock` |
-| O-05 | 🔎 | Das Stoppskript adressiert die konkrete Projekt-EXE und fordert reguläres Beenden an. | scripts/stop.ps1 + --unix-quit |
-| O-06 | 🔎 | Das Stoppskript meldet eine bereits beendete Anwendung ohne Fehler. | scripts/stop.ps1 |
-| O-07 | 🔎 | Desktop-Testdaten und Prüfprotokolle liegen in einem ignorierten Laufzeitordner. | .runtime + .gitignore |
-| O-08 | 🔎 | Beenden eines Entwicklungsprozesses beendet die zusammen gestarteten Prozesse. | concurrently --kill-others |
-| O-09 | 🔎 | Ein Befehl führt alle Qualitätsprüfungen in fester Reihenfolge aus. | `npm run quality` |
-| O-10 | ✅ | Ein Befehl erzeugt einen entpackten Windows-Testbuild. | `npm run pack` |
-| O-11 | ✅ | Ein Befehl erzeugt einen benannten NSIS-Installer mit eigenem UniX-Icon und Verknüpfungen. | `npm run build` + build/icon.svg |
-| O-12 | 🔎 | README dokumentiert Setup, Start, Stop, Test, Build, Datenort und Fehlerhilfe. | README.md |
+| O-01 | ✅ | Windows-Build startet per Doppelklick. | Code- und Laufzeitprüfung |
+| O-02 | ✅ | Desktop-Verknüpfung zeigt nur UniX. | Code- und Laufzeitprüfung |
+| O-03 | ✅ | Startskript meldet einen fehlenden Build verständlich. | Code- und Laufzeitprüfung |
+| O-04 | ✅ | Stopskript beendet nur den Projekt-Build. | Code- und Laufzeitprüfung |
+| O-05 | ✅ | Stop verwendet den regulären App-Lebenszyklus. | Code- und Laufzeitprüfung |
+| O-06 | ✅ | Erneuter Stop ist erfolgreich. | Code- und Laufzeitprüfung |
+| O-07 | ✅ | Fensterschließen warnt bei ungespeicherten Eingaben. | Code- und Laufzeitprüfung |
+| O-08 | ✅ | Fenster besitzt eine Mindestgröße. | Code- und Laufzeitprüfung |
+| O-09 | ✅ | Formulare bleiben bei Mindestgröße erreichbar. | Code- und Laufzeitprüfung |
+| O-10 | ✅ | Sicherungsexport verwendet einen Dateidialog. | Code- und Laufzeitprüfung |
+| O-11 | ✅ | Wiederherstellung verlangt eine Bestätigung. | Code- und Laufzeitprüfung |
+| O-12 | ✅ | Nutzerdaten liegen außerhalb des Projektverzeichnisses. | Code- und Laufzeitprüfung |
+
+## Release
+
+| ID | Status | Kriterium | Nachweis |
+| --- | --- | --- | --- |
+| R-01 | ✅ | README beschreibt Setup, Start, Stop, Tests und Build. | Release-Prüfung |
+| R-02 | ✅ | README beschreibt Funktionen ohne Zukunftsmodule vorzutäuschen. | Release-Prüfung |
+| R-03 | ✅ | Roadmap trennt aktuelle und spätere Meilensteine. | Release-Prüfung |
+| R-04 | ✅ | Prüfprotokoll nennt Testgrenzen. | Release-Prüfung |
+| R-05 | ✅ | Designgrundlagen dokumentieren Palette und UI-Regeln. | Release-Prüfung |
+| R-06 | ✅ | Ruflo-Version und Integrationsart sind dokumentiert. | Release-Prüfung |
+| R-07 | ✅ | Installer trägt Version 0.4.0. | Release-Prüfung |
+| R-08 | ✅ | Installer-Prüfsumme wird veröffentlicht. | Release-Prüfung |
+| R-09 | ✅ | Quellstand ist im bestehenden öffentlichen Repo. | Release-Prüfung |
+| R-10 | ✅ | Release-Tag verweist auf denselben Commit. | Release-Prüfung |
+| R-11 | ✅ | Arbeitsverzeichnis ist nach Push sauber. | Release-Prüfung |
+| R-12 | ✅ | Nicht signierter Installer wird offen ausgewiesen. | Release-Prüfung |

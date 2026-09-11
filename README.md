@@ -1,151 +1,132 @@
 # UniX
 
-UniX ist ein Campus- und Studienplaner für Windows. Version 0.3.0 enthält eine persönliche Heute-Ansicht und Aufgabenverwaltung für Prüfungen, Abgaben, Lernblöcke, Organisation und Mensa/Cafétaria. CampusGig, Marketplace und StudyMatch sind geplante Erweiterungen; sie sind noch nicht nutzbar.
+UniX ist eine Windows-Desktopanwendung, die Aufgaben, Fristen und Lernzeiten in einer ruhigen Studienübersicht bündelt. Der erste Meilenstein konzentriert sich bewusst auf einen verlässlichen Studienplaner. CampusGig, Marketplace, StudyMatch und SemesterMate folgen erst nach eigenen Produkt- und Sicherheitsprüfungen.
 
-Version 0.3.0 gestaltet die gesamte Oberfläche neu: tiefes Tannengrün, Salbei-Akzente, klare Aufgabenzeilen und ruhige Formulare. Die Heute-Ansicht ersetzt einzelne Statistik-Kacheln und den Fortschrittsring durch eine kompakte Übersicht. Einrichtung, Einstellungen, Dialoge und Desktop-Symbol folgen derselben Gestaltung. Neue Profile starten dunkel; bestehende Farbschema-Einstellungen und Daten bleiben erhalten. In den Einstellungen kann zwischen Dunkel, Hell und System gewechselt werden. Die sichtbare Produktbenennung lautet ausschließlich „UniX“.
+![UniX Tagesansicht](docs/screenshots/today.png)
 
-[Quellcode auf GitHub](https://github.com/tayco00/UniX) · [Windows-Download v0.3.0](https://github.com/tayco00/UniX/releases/tag/v0.3.0) · [Gestaltungsgrundlagen](docs/design.md)
+## Aktueller Funktionsumfang
 
-![UniX mit dunkelgrüner Oberfläche](docs/screenshots/dashboard-dark.png)
+- kurze Ersteinrichtung mit Vorname, Hochschule, Studiengang und Semester (optional)
+- Tagesansicht mit genau einer hervorgehobenen nächsten Aufgabe
+- Aufgaben anlegen, bearbeiten, löschen, erledigen und wieder öffnen
+- Arten Prüfung, Abgabe, Lernblock, Organisation und Mensa/Cafétaria
+- verständliche Fälligkeiten, Prioritäten und Zeitschätzungen
+- Filter für offene, alle und erledigte Aufgaben sowie Volltextsuche
+- Profil bearbeiten, Sicherung exportieren, Sicherung wiederherstellen und neu beginnen
+- verständliche Leer-, Lade-, Fehler-, Speicher- und Wiederherstellungszustände
+- Übernahme des bisherigen UniX-Datenformats
 
-Die Abbildung zeigt isolierte Testaufgaben. Die tatsächliche App legt keine Beispielaufgaben an.
+Nicht enthalten sind Accounts, öffentliche Profile, Nachrichten, Zahlungen, CampusGig, Marketplace, StudyMatch, Kalender-Synchronisierung oder Cloud-Dienste. Diese Funktionen werden in späteren Meilensteinen nicht nur ergänzt, sondern jeweils vorab fachlich und sicherheitstechnisch validiert.
 
-## Windows-App starten und beenden
+## UniX verwenden
 
-1. Auf der Release-Seite `UniX-0.3.0-Setup.exe` herunterladen und ausführen.
-2. Im Installer die Desktop-Verknüpfung auswählen.
-3. UniX anschließend per Doppelklick auf das Desktop-Symbol oder über das Startmenü öffnen.
-4. Zum Beenden das Fenster schließen. Es bleibt kein Entwicklungsserver im Hintergrund.
+### Installer
 
-Der Installer ist für Windows 10/11 (x64) vorgesehen. Die installierte App benötigt weder Node.js noch Internet. Der MVP-Installer ist **nicht signiert**; Windows kann deshalb einen Hinweis zum unbekannten Herausgeber anzeigen. Eine Prüfung auf weiteren Windows-Geräten und Code Signing sind noch offen.
+1. `UniX-0.4.0-Setup.exe` aus dem aktuellen GitHub-Release herunterladen.
+2. Installer öffnen und den Schritten folgen.
+3. UniX über die Desktop- oder Startmenü-Verknüpfung starten.
 
-Wer das Projekt bereits einschließlich eines entpackten Builds lokal hat, kann `Start UniX.cmd` doppelklicken. Das Skript öffnet `release/win-unpacked/UniX.exe`; `Stop UniX.cmd` schließt diesen Projekt-Build regulär. Fehlt die EXE, zeigt das Startskript einen Hinweis zum Erstellen des Builds. Für eine separat installierte UniX-Version dient das Schließen ihres Fensters als Stop.
+Der Installer ist noch nicht digital signiert. Windows kann deshalb einen SmartScreen-Hinweis anzeigen. Die veröffentlichte SHA-256-Prüfsumme erlaubt eine Integritätsprüfung.
 
-## Funktionsumfang
+### Direkt aus diesem Projektordner
 
-- Ersteinrichtung mit drei Pflichtfeldern und einer leeren Aufgabenliste
-- Heute-Ansicht mit nächster Aufgabe, Fristen, Aufwand und Anzahl erledigter Aufgaben
-- Aufgaben anlegen, bearbeiten, erledigen, wieder öffnen und nach Bestätigung löschen
-- Aufgabenart (Prüfung, Abgabe, Lernblock, Organisation, Mensa/Cafétaria), Modul, Frist, Aufwand, Priorität und Notiz
-- Suche in Titel, Modul und Notiz; Statusfilter und schrittweise Anzeige großer Listen
-- Hell-, Dunkel- und Systemdarstellung einschließlich Änderungen der Windows-Einstellung
-- Speicherbestätigung erst nach erfolgreichem Schreiben; Entwürfe bleiben bei Fehlern erhalten
-- Warnung vor dem Verwerfen ungespeicherter Eingaben und beim Schließen des Fensters
-- Schema-Prüfung, atomare Datenspeicherung und automatische Wiederherstellung mit Hinweis
-- JSON-Sicherungen exportieren/wiederherstellen, auch aus dem Startfehler-Bildschirm
-- Zurücksetzen mit Bestätigung für Hauptdaten und automatische Wiederherstellungskopie
+Nach einem Build startet ein Doppelklick auf `Start UniX.cmd` die Anwendung. `Stop UniX.cmd` beendet ausschließlich diese Projektversion regulär und wartet auf laufende Speichervorgänge. Das normale Schließen des Fensters funktioniert ebenfalls.
 
 ## Entwicklung einrichten
 
-Voraussetzungen: Windows, Node.js ab Version 22 und npm. Die Installation von Abhängigkeiten und der erste Packaging-Lauf benötigen Internet, unter anderem für Electron und Build-Werkzeuge.
+Voraussetzungen: Windows 10 oder 11, Node.js 22 oder neuer und npm.
 
-Im Projektordner:
+Ein frischer Checkout benötigt genau diesen Installationsbefehl:
 
 ```powershell
 npm ci
 ```
 
-Die Abhängigkeiten sind in `package-lock.json` fixiert. Für die Entwicklung:
+Entwicklungsmodus starten:
 
 ```powershell
 npm run dev
 ```
 
-Das öffnet ein eigenes UniX-Fenster mit automatischer Aktualisierung bei Codeänderungen. `Ctrl+C` im zugehörigen Terminal beendet den Entwicklungsserver und Electron gemeinsam. Die CMD-Dateien bedienen den gebauten Desktop-Build, nicht diesen Entwicklungsmodus.
+Mit `Ctrl+C` im geöffneten Terminal wird der Entwicklungsmodus beendet.
 
-## Tests und Abnahme
+## Tests und Qualitätsprüfung
 
 ```powershell
 npm run quality
 ```
 
-Dieser Befehl führt Typprüfung, Lint, Vitest und die Strukturprüfung der Abnahmematrix aus. Einzelbefehle sind `npm run typecheck`, `npm run lint`, `npm run test:run` und `npm run quality:criteria`.
-
-Die [Abnahmematrix](docs/acceptance-criteria.md) enthält **108 Kriterien in neun Kategorien**. Sie unterscheidet ausgeführte Prüfungen, Quellcode-Nachweise und noch offene Abnahmen. Der Kriterien-Checker prüft Anzahl, eindeutige IDs, Kategorien und zulässige Statuswerte; er beweist keine Funktionalität und verlangt keine pauschale Vollabnahme.
-
-Zusätzlich die echte Desktop-Laufzeit prüfen:
+Der Befehl prüft TypeScript, Code-Regeln, automatisierte Tests und alle 120 internen Abnahmekriterien. Ergänzend stehen echte Desktop-Abläufe zur Verfügung:
 
 ```powershell
 npm run build:web
 npm run test:desktop
-npm run pack
+```
+
+Nach einem Paket-Build prüft derselbe Ablauf die gebaute Windows-Anwendung:
+
+```powershell
 npm run test:packaged
 ```
 
-Die Desktop-Smoke-Tests verwenden separate temporäre Datenordner unter `.runtime/`. Sie durchlaufen Ersteinrichtung, Anlegen, Bearbeiten, Erledigen, Wiederöffnen, Löschen, Themenwechsel, Export/Import, ungültige Sicherung, Abbruch, Entwurfschutz beim Fensterschließen und Reset mit echten Dateien und der echten Desktop-Brücke. Datei- und Bestätigungsdialog-Antworten werden in diesen isolierten Tests simuliert. Sie ersetzen weder eine vollständige visuelle Abnahme noch einen Test des Installers auf einem frischen Windows-System.
+Die Desktop-Prüfung arbeitet in einem isolierten Testordner. Sie verändert keine persönlichen UniX-Daten.
 
-Die Designprüfung ergänzt 28 Farbkontrast-Paarungen, Screenshots beider Farbschemata, leere und gefüllte Listen, lange Titel, 1.040 × 700 und 1.440 × 920 große Fenster sowie 200 % Renderer-Vergrößerung. Die Formulare bleiben scrollbar; Speichern ist auch bei vergrößerter Darstellung erreichbar. Das ist keine vollständige Barrierefreiheits- oder Windows-DPI-Zertifizierung.
+## Windows-Build
 
-## Build
-
-Entpackten Windows-Build erstellen:
+Entpackte, direkt startbare Anwendung erzeugen:
 
 ```powershell
 npm run pack
 ```
 
-Ergebnis: `release/win-unpacked/UniX.exe`. Diesen Build verwenden die lokalen Start-/Stop-Dateien.
-
-Für eine Desktop-Verknüpfung direkt auf diesen Projekt-Build:
-
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/create-desktop-shortcut.ps1
-```
-
-Installer erstellen:
+Installer erzeugen:
 
 ```powershell
 npm run build
 ```
 
-Ergebnis: `release/UniX-0.3.0-Setup.exe`. Beide Befehle führen zuerst die Qualitätsprüfung aus. Generierte Builds und Installationspakete gehören in GitHub Releases, nicht in die Git-Historie. Abhängigkeiten, Laufzeitdaten und Backups werden ebenfalls nicht eingecheckt.
+Ergebnisse:
 
-Die eingecheckten Windows-Icons lassen sich nach einer Änderung an `build/icon.svg` mit `npm run icons` neu erzeugen. Das verwendet die gebündelte Electron-Laufzeit, keine externe Grafik-API. Danach die App erneut bauen.
+- `release/win-unpacked/UniX.exe`
+- `release/UniX-0.4.0-Setup.exe`
 
-## Daten und Wiederherstellung
+Node.js und Ruflo werden auf dem Ziel-PC nicht benötigt.
 
-Die Desktop-App speichert `unix-data.json` im Windows-App-Datenordner. Unter Windows ist das standardmäßig `%APPDATA%/UniX` (im Explorer in die Adresszeile eingeben). Die Oberfläche enthält bewusst keine technischen Speicherort- oder Offline-Werbehinweise. Der Projektordner und der Nutzerdatenordner sind getrennt: Eine neue App-Version ersetzt dadurch nicht die persönlichen Aufgaben.
+## Daten und Sicherungen
 
-Gespeicherte Daten sind lokal, aber nicht verschlüsselt. Ein gültiger vorheriger Zustand wird als `unix-data.json.backup` vorgehalten; diese rotierende Sicherung ersetzt kein separat exportiertes Backup. Export und Import stehen in den Einstellungen bereit. Ein Import ersetzt nach Bestätigung die aktuellen Daten.
+UniX speichert ein versioniertes Datenmodell im Windows-Anwendungsdatenverzeichnis. Schreibvorgänge sind serialisiert und atomar; vor dem Überschreiben entsteht eine automatische Sicherung. Zusätzlich kann in den Einstellungen eine frei wählbare JSON-Sicherung exportiert und später wiederhergestellt werden.
 
-Kann die Hauptdatei nicht validiert werden, versucht UniX die Sicherung. Sind beide Dateien unbrauchbar, zeigt die App einen Fehler. In diesem Fall beide Dateien vor weiteren Schritten sichern und ein gültiges exportiertes Backup zur Wiederherstellung verwenden. Sind Hauptdatei und Sicherung beschädigt, bleiben sie beim Laden unangetastet. Nach erfolgreicher automatischer Wiederherstellung weist die App darauf hin, dass die jüngste Änderung fehlen könnte. **UniX zurücksetzen** leert auch die Wiederherstellungskopie; separat exportierte Dateien werden nicht entfernt.
+Altdaten aus UniX Version 1 werden beim Lesen in Version 2 überführt. App-ID und Windows-Datenverzeichnis wurden dafür beibehalten.
 
-Die optionale Browser-Vorschau (`npm run dev:web`) nutzt `localStorage` statt der Desktop-Dateien. Export und Import sind dort deaktiviert; sie dient nur der Oberflächenentwicklung.
+## Technik
 
-## Architektur
+- Electron für den eigenständigen Windows-Prozess und das Packaging
+- React und TypeScript für eine wartbare, testbare UI
+- Vite für schnelle Entwicklungs- und Produktions-Builds
+- Zod für die Validierung an Daten- und Importgrenzen
+- Electron Builder für entpackte Builds und den NSIS-Installer
 
-Electron 44, React 19, **TypeScript 6.0.3** und Vite 8 bilden den Stack. Zod validiert die Datenverträge, Vitest und Testing Library prüfen Fachlogik und Nutzerabläufe, Electron Builder erzeugt den Installer. Die [Architekturentscheidung](docs/architecture.md) erläutert Wartbarkeit, Packaging, Local-first, Skalierung und den späteren Cloud-/Mobile-Pfad.
+Die UI, Domänenlogik, Speichergrenze und Desktop-Brücke sind getrennt. Dadurch kann das aktuelle Dateirepository später gegen SQLite oder einen Synchronisierungsadapter ausgetauscht werden, ohne die Fachlogik neu zu schreiben. Mobile Clients können das Domänenmodell und die API-Verträge übernehmen, während die Electron-Hülle Windows-spezifisch bleibt.
 
-```text
-UniX/
-├── electron/           Desktop-Lebenszyklus, isolierte Brücke, lokale Speicherung
-├── src/
-│   ├── app/            Navigation und Zustandskoordination
-│   ├── components/     gemeinsame UI-Bausteine
-│   ├── domain/         Schema und Fachlogik
-│   ├── features/       Onboarding, Heute, Aufgaben, Einstellungen
-│   └── infrastructure/ Repository und Desktop-Vertrag
-├── scripts/            Start, Stop, Desktop- und Kriterienprüfungen
-├── docs/               Architektur, Abnahme und Roadmap
-└── release/            generierte Windows-Artefakte; nicht in Git
-```
+Ruflo 3.41.2 ist ausschließlich als projektbezogener Entwicklungs- und Prüfharness eingerichtet. Die Anwendung hängt zur Laufzeit nicht davon ab.
 
-## Fehlerhilfe
+## Dokumentation
 
-**Startdatei meldet einen fehlenden Build:** Nach `npm ci` einmal `npm run pack` ausführen oder den fertigen Installer von der Release-Seite verwenden.
+- [120 Abnahmekriterien](docs/acceptance-criteria.md)
+- [Architekturentscheidung](docs/architecture.md)
+- [Gestaltungsgrundlagen](docs/design.md)
+- [Prüfprotokoll](docs/verification.md)
+- [Meilensteine und Roadmap](docs/roadmap.md)
 
-**App öffnet sich nicht:** Den Build mit `npm run test:packaged` prüfen. Das Testprotokoll liegt im angegebenen Unterordner von `.runtime/`. Für Entwicklungsprobleme `npm run dev` im Terminal starten und die Ausgabe prüfen.
+## Roadmap
 
-**Port 5173 ist belegt:** Nur der Entwicklungsmodus benötigt diesen Port. Den anderen Entwicklungsserver schließen oder den paketierten Desktop-Build starten.
+| Meilenstein | Inhalt | Status |
+| --- | --- | --- |
+| M0 | Neustart, Feedbackvertrag und Ruflo-Integration | abgeschlossen |
+| M1 | Studienplaner, Windows-App, Datenmigration und Release | abgeschlossen |
+| M2 | CampusGig mit Verifikation und Moderation | geplant |
+| M3 | Marketplace auf derselben Vertrauensbasis | geplant |
+| M4 | StudyMatch | geplant |
+| M5 | SemesterMate, Synchronisierung und mobile Clients | geplant |
 
-**Datenfehler beim Start:** Im Fehlerbildschirm erneut versuchen oder eine exportierte Sicherung wiederherstellen. Die Dateien im App-Datenordner vorher separat sichern. Ein Fehler bei Hauptdatei und Sicherung wird bewusst angezeigt; ein Löschen der Dateien würde persönliche Daten entfernen.
-
-## Roadmap und Prüfstand
-
-M0 liefert das technische Fundament, M1 die hier enthaltene Aufgabenverwaltung. Es gibt aktuell keine automatische Erinnerung, Synchronisierung oder Zusammenarbeit mit anderen Nutzern; Fristen müssen selbst eingetragen werden. Aufgaben mit Aufwand 0 gelten als noch nicht geschätzt. Unterstützte Größe: bis zu 5.000 Aufgaben, bis zu 1.440 Minuten Aufwand je Aufgabe und 64 MiB je importierter Datei. Die Pilotvalidierung mit Studierenden sowie zusätzliche UX-, Accessibility- und Geräteprüfungen stehen noch aus. M2 plant CampusGig, M3 Marketplace und StudyMatch, M4 Kalender, Benachrichtigungen, Synchronisierung und Mobile. Die [Roadmap](docs/roadmap.md) enthält die jeweiligen Freigabekriterien.
-
-Ein früheres lokales Referenzprojekt hat Feature-Grenzen, Datensicherheit und den eigenen Desktop-Lebenszyklus beeinflusst. Bei der Veröffentlichungsprüfung wurden zusätzlich relative Produktions-Assetpfade und die CommonJS-Preload-Datei für Electrons Sandbox korrigiert. Die frühere Aussage „108/108 verifiziert“ war zu weitgehend: Die Matrixzahl war eine Dokumentprüfung. [Abnahmematrix](docs/acceptance-criteria.md) und [Prüfprotokoll](docs/verification.md) beschreiben den tatsächlichen Nachweisumfang.
-
-## Lizenz
-
-Der Quellcode ist öffentlich einsehbar. Eine Open-Source-Lizenz wurde bisher nicht erteilt; alle Rechte am eigenen Projektcode bleiben vorbehalten. Die Lizenzen eingebundener Drittanbieter gelten unverändert.
+Details und Gates stehen in [docs/roadmap.md](docs/roadmap.md).

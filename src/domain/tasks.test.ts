@@ -1,81 +1,78 @@
 import { describe, expect, it } from "vitest";
 import type { Task } from "./model";
 import {
-  daysUntil,
-  dueThisWeek,
-  formatDueLabel,
-  plannedMinutes,
+  dueLabel,
+  minutesLabel,
+  openTasks,
   sortTasks,
-  todayKey,
+  weekTasks,
 } from "./tasks";
 
-const task = (changes: Partial<Task> = {}): Task => ({
-  id: "task-1",
-  title: "Test",
-  module: "Statistik",
+const make = (overrides: Partial<Task> = {}): Task => ({
+  id: crypto.randomUUID(),
+  title: "Aufgabe",
+  course: "Modul",
   type: "assignment",
-  dueDate: "2026-09-10",
+  dueDate: "2026-09-12",
   estimateMinutes: 60,
   priority: "medium",
   status: "open",
   notes: "",
-  createdAt: "2026-09-01T10:00:00.000Z",
-  updatedAt: "2026-09-01T10:00:00.000Z",
-  ...changes,
+  createdAt: "2026-09-01",
+  updatedAt: "2026-09-01",
+  ...overrides,
 });
 
-describe("task domain", () => {
-  const now = new Date("2026-09-10T08:00:00+02:00");
-
-  it("creates a locale-safe date key", () =>
-    expect(todayKey(now)).toBe("2026-09-10"));
-  it("calculates calendar days without UTC drift", () =>
-    expect(daysUntil("2026-09-11", now)).toBe(1));
-  it("uses human due labels", () => {
-    expect(formatDueLabel("2026-09-10", now)).toBe("Heute");
-    expect(formatDueLabel("2026-09-11", now)).toBe("Morgen");
-    expect(formatDueLabel("2026-09-09", now)).toContain("überfällig");
-  });
-  it("sorts open tasks ahead of completed tasks and then by date", () => {
-    const sorted = sortTasks([
-      task({ id: "done", status: "done" }),
-      task({ id: "later", dueDate: "2026-09-12" }),
-      task({ id: "first", dueDate: "2026-09-11" }),
-    ]);
-    expect(sorted.map((entry) => entry.id)).toEqual(["first", "later", "done"]);
-  });
-  it("counts today through Sunday, excluding next Monday and overdue dates", () => {
+describe("task selectors", () => {
+  const now = new Date("2026-09-11T12:00:00");
+  it("sorts open tasks before completed tasks", () =>
     expect(
-      dueThisWeek(
+      sortTasks([make({ status: "done" }), make({ id: "open" })])[0].id,
+    ).toBe("open"));
+  it("sorts by due date", () =>
+    expect(
+      sortTasks([
+        make({ id: "later", dueDate: "2026-09-14" }),
+        make({ id: "first", dueDate: "2026-09-12" }),
+      ])[0].id,
+    ).toBe("first"));
+  it("sorts equal dates by priority", () =>
+    expect(
+      sortTasks([
+        make({ id: "low", priority: "low" }),
+        make({ id: "high", priority: "high" }),
+      ])[0].id,
+    ).toBe("high"));
+  it("returns only open tasks", () =>
+    expect(openTasks([make(), make({ status: "done" })])).toHaveLength(1));
+  it.each([
+    [0, "Heute"],
+    [1, "Morgen"],
+    [-1, "Seit gestern fällig"],
+    [-3, "Seit 3 Tagen fällig"],
+    [4, "In 4 Tagen"],
+  ])("formats offset %i", (offset, label) => {
+    const date = new Date(2026, 8, 11 + Number(offset));
+    const key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    expect(dueLabel(key, now)).toBe(label);
+  });
+  it("limits weekly tasks to seven days", () =>
+    expect(
+      weekTasks(
         [
-          task(),
-          task({ id: "sunday", dueDate: "2026-09-13" }),
-          task({ id: "monday", dueDate: "2026-09-14" }),
-          task({ id: "overdue", dueDate: "2026-09-09" }),
-          task({ id: "done", status: "done" }),
+          make({ dueDate: "2026-09-11" }),
+          make({ dueDate: "2026-09-17" }),
+          make({ dueDate: "2026-09-18" }),
         ],
         now,
-      ).map((entry) => entry.id),
-    ).toEqual(["task-1", "sunday"]);
-    expect(
-      dueThisWeek(
-        [
-          task({ dueDate: "2026-09-13" }),
-          task({ id: "next", dueDate: "2026-09-14" }),
-        ],
-        new Date("2026-09-13T12:00:00"),
       ),
-    ).toHaveLength(1);
-  });
-  it("includes the year for deadlines in another year", () => {
-    expect(formatDueLabel("2027-01-15", now)).toContain("2027");
-  });
-  it("sums estimates for open tasks only", () =>
-    expect(
-      plannedMinutes([
-        task(),
-        task({ id: "two", estimateMinutes: 30 }),
-        task({ id: "done", status: "done", estimateMinutes: 999 }),
-      ]),
-    ).toBe(90));
+    ).toHaveLength(2));
+  it.each([
+    [0, "Noch nicht geschätzt"],
+    [20, "20 Min."],
+    [60, "1 Std."],
+    [95, "1 Std. 35 Min."],
+  ])("formats %i minutes", (minutes, label) =>
+    expect(minutesLabel(Number(minutes))).toBe(label),
+  );
 });

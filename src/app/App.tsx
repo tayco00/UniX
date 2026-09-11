@@ -5,445 +5,372 @@ import {
   LoaderCircle,
   Settings as SettingsIcon,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Logo } from "../components/Logo";
 import { Modal } from "../components/Modal";
 import { TaskEditor, type TaskDraft } from "../components/TaskEditor";
 import {
-  appDataSchema,
+  parseData,
   type AppData,
   type Profile,
   type Task,
-  type Theme,
 } from "../domain/model";
-import { Dashboard } from "../features/dashboard/Dashboard";
-import { Onboarding } from "../features/onboarding/Onboarding";
-import { SemesterMate } from "../features/semester/SemesterMate";
-import { Settings } from "../features/settings/Settings";
+import { Onboarding } from "../features/Onboarding";
+import { Settings } from "../features/Settings";
+import { Tasks } from "../features/Tasks";
+import { Today } from "../features/Today";
 import { repository } from "../infrastructure/repository";
 
-type View = "dashboard" | "semester" | "settings";
-type EditorState = { mode: "create" } | { mode: "edit"; task: Task } | null;
+type View = "today" | "tasks" | "settings";
+type Editor = { mode: "new" } | { mode: "edit"; task: Task };
 
 export default function App() {
-  const [data, setData] = useState<AppData | null>(null);
-  const latest = useRef<AppData | null>(null);
-  const busyRef = useRef(false);
-  const dirtyRef = useRef(false);
+  const [data, setData] = useState<AppData>();
+  const [view, setView] = useState<View>("today");
+  const [editor, setEditor] = useState<Editor>();
   const [busy, setBusy] = useState(false);
-  const [view, setView] = useState<View>("dashboard");
-  const [editor, setEditor] = useState<EditorState>(null);
-  const [toast, setToast] = useState("");
+  const [dirty, setDirty] = useState(false);
+  const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
-  const [loadError, setLoadError] = useState("");
-  const [now, setNow] = useState(() => new Date());
-  const [settingsRevision, setSettingsRevision] = useState(0);
-  const [recoveryNotice, setRecoveryNotice] = useState(false);
-  const onDirty = useCallback((dirty: boolean) => {
-    dirtyRef.current = dirty;
-  }, []);
-  const accept = useCallback((value: AppData) => {
-    const parsed = appDataSchema.parse(value);
-    latest.current = parsed;
-    setData(parsed);
-  }, []);
-  const load = useCallback(
-    () =>
-      repository
-        .load()
-        .then((loaded) => {
-          accept(loaded);
-          setLoadError("");
-          void repository
-            .getAppInfo()
-            .then((info) => setRecoveryNotice(!!info.recoveredFromBackup))
-            .catch(() => undefined);
-        })
-        .catch(() =>
-          setLoadError(
-            "Deine Daten konnten nicht geöffnet werden. Sie wurden nicht verändert. Versuche es erneut oder stelle eine Sicherung wieder her.",
-          ),
+  const [recovered, setRecovered] = useState(false);
+  const [now, setNow] = useState(new Date());
+  const latest = useRef<AppData | undefined>(undefined);
+  const busyRef = useRef(false);
+
+  useEffect(() => {
+    void Promise.all([repository.load(), repository.info()])
+      .then(([loaded, info]) => {
+        latest.current = loaded;
+        setData(loaded);
+        setRecovered(info.recoveredFromBackup);
+      })
+      .catch(() =>
+        setError(
+          "UniX konnte deine Daten nicht öffnen. Versuche es erneut oder stelle eine Sicherung wieder her.",
         ),
-    [accept],
-  );
+      );
+  }, []);
   useEffect(() => {
-    void load();
-  }, [load]);
+    latest.current = data;
+  }, [data]);
   useEffect(() => {
-    const refresh = () => setNow(new Date());
-    const timer = window.setInterval(refresh, 60_000);
-    window.addEventListener("focus", refresh);
-    const protectDraft = (event: BeforeUnloadEvent) => {
-      if (dirtyRef.current || busyRef.current) {
+    const timer = setInterval(() => setNow(new Date()), 60_000);
+    const focus = () => setNow(new Date());
+    window.addEventListener("focus", focus);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("focus", focus);
+    };
+  }, []);
+  useEffect(() => {
+    const prevent = (event: BeforeUnloadEvent) => {
+      if (dirty || busyRef.current) {
         event.preventDefault();
         event.returnValue = "";
       }
     };
-    window.addEventListener("beforeunload", protectDraft);
-    return () => {
-      clearInterval(timer);
-      window.removeEventListener("focus", refresh);
-      window.removeEventListener("beforeunload", protectDraft);
-    };
-  }, []);
-  const theme = data?.settings.theme ?? "dark";
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const apply = () => {
-      document.documentElement.dataset.theme =
-        theme === "system" ? (media.matches ? "dark" : "light") : theme;
-    };
-    apply();
-    media.addEventListener("change", apply);
-    return () => media.removeEventListener("change", apply);
-  }, [theme]);
-  useEffect(() => {
-    if (!toast) return;
-    const timer = window.setTimeout(() => setToast(""), 4500);
-    return () => window.clearTimeout(timer);
-  }, [toast]);
+    window.addEventListener("beforeunload", prevent);
+    return () => window.removeEventListener("beforeunload", prevent);
+  }, [dirty]);
 
-  // Guard synchronously against duplicate submissions; acknowledge only durable writes.
-  async function run(operation: () => Promise<void>, failure: string) {
+  const confirmDiscard = () =>
+    !dirty || window.confirm("Ungespeicherte Eingaben verwerfen?");
+  const navigate = (next: View) => {
+    if (!confirmDiscard()) return;
+    setDirty(false);
+    setView(next);
+  };
+  const run = async (action: () => Promise<void>) => {
     if (busyRef.current) return false;
     busyRef.current = true;
     setBusy(true);
     setError("");
-    setToast("");
     try {
-      await operation();
+      await action();
       return true;
     } catch {
-      setError(failure);
+      setError(
+        "Das hat nicht funktioniert. Deine bisherigen Daten wurden nicht verändert.",
+      );
       return false;
     } finally {
       busyRef.current = false;
       setBusy(false);
     }
-  }
-  async function commit(
-    update: (current: AppData) => AppData,
-    message: string,
-  ) {
-    return run(async () => {
-      if (!latest.current) throw new Error("Data unavailable");
-      const next = appDataSchema.parse({
-        ...update(latest.current),
+  };
+  const commit = async (
+    change: (current: AppData) => AppData,
+    success: string,
+  ) =>
+    run(async () => {
+      if (!latest.current) throw new Error("Noch nicht bereit");
+      const candidate = parseData({
+        ...change(latest.current),
         updatedAt: new Date().toISOString(),
       });
-      accept(await repository.save(next));
-      setToast(message);
-    }, "Speichern fehlgeschlagen. Deine Änderung wurde nicht übernommen. Dein Entwurf bleibt erhalten; bitte versuche es erneut. Prüfe bei wiederholten Fehlern den freien Speicherplatz.");
-  }
-  function canLeave() {
-    if (busyRef.current) return false;
-    if (
-      dirtyRef.current &&
-      !window.confirm("Ungespeicherte Änderungen verwerfen?")
-    )
-      return false;
-    dirtyRef.current = false;
-    setError("");
-    return true;
-  }
-  function navigate(next: View) {
-    if (next !== view && canLeave()) setView(next);
-  }
-  function closeEditor() {
-    if (canLeave()) setEditor(null);
-  }
-  async function completeOnboarding(profile: Profile) {
-    if (
-      await commit(
-        (current) => ({ ...current, onboardingCompleted: true, profile }),
-        "UniX ist bereit",
-      )
-    )
-      onDirty(false);
-  }
-  async function saveTask(draft: TaskDraft) {
-    const timestamp = new Date().toISOString();
-    const editingId = editor?.mode === "edit" ? editor.task.id : undefined;
-    const saved = await commit(
-      (current) => ({
-        ...current,
-        tasks: editingId
-          ? current.tasks.map((task) =>
-              task.id === editingId
-                ? { ...task, ...draft, updatedAt: timestamp }
-                : task,
-            )
-          : [
-              ...current.tasks,
-              {
-                ...draft,
-                id: crypto.randomUUID(),
-                status: "open",
-                createdAt: timestamp,
-                updatedAt: timestamp,
-              },
-            ],
-      }),
-      editingId ? "Aufgabe aktualisiert" : "Aufgabe angelegt",
+      const saved = await repository.save(candidate);
+      latest.current = saved;
+      setData(saved);
+      setNotice(success);
+      window.setTimeout(() => setNotice(""), 2500);
+    });
+  const completeSetup = async (profile: Profile) => {
+    const success = await commit(
+      (current) => ({ ...current, setupCompleted: true, profile }),
+      "UniX ist bereit",
     );
-    if (saved) {
-      onDirty(false);
-      setEditor(null);
+    if (success) setDirty(false);
+  };
+  const saveTask = async (draft: TaskDraft) => {
+    const timestamp = new Date().toISOString();
+    const success = await commit(
+      (current) =>
+        editor?.mode === "edit"
+          ? {
+              ...current,
+              tasks: current.tasks.map((task) =>
+                task.id === editor.task.id
+                  ? { ...task, ...draft, updatedAt: timestamp }
+                  : task,
+              ),
+            }
+          : {
+              ...current,
+              tasks: [
+                ...current.tasks,
+                {
+                  ...draft,
+                  id: crypto.randomUUID(),
+                  status: "open",
+                  createdAt: timestamp,
+                  updatedAt: timestamp,
+                },
+              ],
+            },
+      editor?.mode === "edit" ? "Aufgabe gespeichert" : "Aufgabe angelegt",
+    );
+    if (success) {
+      setEditor(undefined);
+      setDirty(false);
     }
-  }
-  async function toggleTask(task: Task) {
-    await commit(
+  };
+  const toggle = (task: Task) =>
+    void commit(
       (current) => ({
         ...current,
-        tasks: current.tasks.map((entry) =>
-          entry.id === task.id
+        tasks: current.tasks.map((item) =>
+          item.id === task.id
             ? {
-                ...entry,
-                status: entry.status === "done" ? "open" : "done",
+                ...item,
+                status: item.status === "open" ? "done" : "open",
                 updatedAt: new Date().toISOString(),
               }
-            : entry,
+            : item,
         ),
       }),
-      task.status === "done"
-        ? "Aufgabe wieder geöffnet"
-        : "Aufgabe erledigt. Unter „Erledigt“ kannst du sie wieder öffnen.",
+      task.status === "open" ? "Aufgabe erledigt" : "Aufgabe wieder geöffnet",
     );
-  }
-  async function deleteTask(task: Task) {
-    if (
-      busyRef.current ||
-      !window.confirm(
-        `„${task.title}“ löschen? Diese Aufgabe wird dauerhaft aus deiner Liste entfernt.`,
-      )
-    )
-      return;
-    if (
-      await commit(
-        (current) => ({
-          ...current,
-          tasks: current.tasks.filter((entry) => entry.id !== task.id),
-        }),
-        "Aufgabe gelöscht",
-      )
-    ) {
-      onDirty(false);
-      setEditor(null);
+  const remove = async (task: Task) => {
+    if (!window.confirm(`„${task.title}“ wirklich löschen?`)) return;
+    const success = await commit(
+      (current) => ({
+        ...current,
+        tasks: current.tasks.filter((item) => item.id !== task.id),
+      }),
+      "Aufgabe gelöscht",
+    );
+    if (success) {
+      setEditor(undefined);
+      setDirty(false);
     }
-  }
-  async function updateProfile(profile: Profile) {
-    const saved = await commit(
+  };
+  const saveProfile = async (profile: Profile) => {
+    const success = await commit(
       (current) => ({ ...current, profile }),
       "Profil gespeichert",
     );
-    if (saved) onDirty(false);
-    return saved;
-  }
-  async function updateTheme(theme: Theme) {
-    await commit(
-      (current) => ({ ...current, settings: { ...current.settings, theme } }),
-      "Darstellung aktualisiert",
-    );
-  }
-  async function importBackup() {
-    if (
-      busyRef.current ||
-      (dirtyRef.current &&
-        !window.confirm(
-          "Ungespeicherte Profiländerungen verwerfen und eine Sicherung auswählen?",
-        ))
-    )
-      return;
-    await run(async () => {
-      const result = await repository.importBackup();
-      if (result.data) {
-        accept(result.data);
-        onDirty(false);
-        setRecoveryNotice(false);
-        setSettingsRevision((revision) => revision + 1);
-        setLoadError("");
-        setToast("Sicherung wiederhergestellt");
-      }
-    }, "Die Sicherung konnte nicht wiederhergestellt werden. Wähle eine gültige UniX-JSON-Datei. Deine bisherigen Daten bleiben erhalten.");
-  }
-  async function exportBackup() {
+    if (success) setDirty(false);
+    return success;
+  };
+  const exportBackup = async () => {
     await run(async () => {
       const result = await repository.exportBackup();
-      if (!result.canceled) setToast("Sicherung gespeichert");
-    }, "Die Sicherung konnte nicht gespeichert werden. Bitte wähle einen beschreibbaren Ordner und versuche es erneut.");
-  }
-  async function resetData() {
+      if (!result.canceled) setNotice("Sicherung gespeichert");
+    });
+  };
+  const importBackup = async () => {
+    if (!confirmDiscard()) return;
+    await run(async () => {
+      const result = await repository.importBackup();
+      if (result.canceled || !result.data) return;
+      const loaded = parseData(result.data);
+      latest.current = loaded;
+      setData(loaded);
+      setDirty(false);
+      setNotice("Sicherung wiederhergestellt");
+    });
+  };
+  const reset = async () => {
     if (
-      busyRef.current ||
       !window.confirm(
-        "Profil und alle Aufgaben zurücksetzen? Exportiere vorher eine Sicherung, wenn du sie behalten möchtest. Auch die automatische Wiederherstellungskopie wird zurückgesetzt.",
+        "UniX wirklich zurücksetzen? Profil und Aufgaben werden entfernt.",
       )
     )
       return;
     await run(async () => {
-      accept(await repository.reset());
-      onDirty(false);
-      setRecoveryNotice(false);
-      setView("dashboard");
-    }, "Zurücksetzen fehlgeschlagen. Bitte versuche es erneut.");
-  }
-  const errorNotice = error && (
-    <p className="error-notice" role="alert">
-      {error}
-    </p>
-  );
-  if (loadError)
+      const fresh = await repository.reset();
+      latest.current = fresh;
+      setData(fresh);
+      setDirty(false);
+      setView("today");
+      setNotice("");
+    });
+  };
+
+  if (!data && !error)
     return (
-      <main className="fatal-state">
-        <Logo />
-        <h1>Daten nicht verfügbar</h1>
-        <p>{loadError}</p>
-        {errorNotice}
-        <div className="data-buttons">
-          <button
-            disabled={busy}
-            className="button button-inverse"
-            onClick={() => void load()}
-          >
-            Erneut versuchen
-          </button>
-          <button
-            disabled={busy}
-            className="button button-inverse"
-            onClick={() => void importBackup()}
-          >
-            Sicherung wiederherstellen
-          </button>
-        </div>
+      <main className="center-state">
+        <LoaderCircle className="spin" />
+        <p>UniX wird geöffnet …</p>
       </main>
     );
   if (!data)
     return (
-      <main className="loading-state">
+      <main className="center-state">
         <Logo />
-        <LoaderCircle className="spinner" />
-        <p>UniX wird geöffnet …</p>
+        <h1>UniX konnte nicht starten.</h1>
+        <p>{error}</p>
+        <button
+          className="button primary"
+          onClick={() => window.location.reload()}
+        >
+          Erneut versuchen
+        </button>
+        <button
+          className="button secondary"
+          disabled={!window.unixApi}
+          onClick={() => void importBackup()}
+        >
+          Sicherung wiederherstellen
+        </button>
       </main>
     );
-  if (!data.onboardingCompleted)
+  if (!data.setupCompleted)
     return (
       <Onboarding
-        onComplete={completeOnboarding}
-        onDirty={onDirty}
         busy={busy}
         error={error}
+        onComplete={completeSetup}
+        onDirty={setDirty}
       />
     );
-  function addTask() {
-    if (data!.tasks.length >= 5000) {
-      setError(
-        "Deine Liste enthält 5.000 Aufgaben. Exportiere eine Sicherung und entferne nicht mehr benötigte Aufgaben, bevor du weitere anlegst.",
-      );
-      return;
-    }
-    onDirty(false);
-    setError("");
-    setEditor({ mode: "create" });
-  }
-  const editTask = (task: Task) => {
-    onDirty(false);
-    setError("");
-    setEditor({ mode: "edit", task });
-  };
+
   return (
     <div className="app-shell" aria-busy={busy}>
       <div
+        className="app-content"
         inert={editor ? true : undefined}
         aria-hidden={editor ? true : undefined}
       >
         <aside className="sidebar">
           <Logo />
           <nav aria-label="Hauptnavigation">
-            <p className="nav-label">Übersicht</p>
             <button
-              disabled={busy}
-              aria-current={view === "dashboard" ? "page" : undefined}
-              className={view === "dashboard" ? "active" : ""}
-              type="button"
-              onClick={() => navigate("dashboard")}
+              className={view === "today" ? "active" : ""}
+              aria-current={view === "today" ? "page" : undefined}
+              onClick={() => navigate("today")}
             >
-              <Home size={18} /> Heute
+              <Home size={18} />
+              Heute
             </button>
             <button
-              disabled={busy}
-              aria-current={view === "semester" ? "page" : undefined}
-              className={view === "semester" ? "active" : ""}
-              type="button"
-              onClick={() => navigate("semester")}
+              className={view === "tasks" ? "active" : ""}
+              aria-current={view === "tasks" ? "page" : undefined}
+              onClick={() => navigate("tasks")}
             >
-              <CalendarCheck size={18} /> Aufgaben
+              <CalendarCheck size={18} />
+              Aufgaben
             </button>
           </nav>
           <div className="sidebar-bottom">
             <button
-              disabled={busy}
-              aria-current={view === "settings" ? "page" : undefined}
               className={view === "settings" ? "active" : ""}
-              type="button"
+              aria-current={view === "settings" ? "page" : undefined}
               onClick={() => navigate("settings")}
             >
-              <SettingsIcon size={18} /> Einstellungen
+              <SettingsIcon size={18} />
+              Einstellungen
             </button>
-            <div className="profile-chip">
-              <span>{data.profile.name.slice(0, 1).toUpperCase()}</span>
+            <div className="profile">
+              <span>{data.profile.firstName.slice(0, 1).toUpperCase()}</span>
               <div>
-                <strong>{data.profile.name}</strong>
-                <small>{data.profile.studyProgram}</small>
+                <strong>{data.profile.firstName}</strong>
+                <small>{data.profile.courseOfStudy}</small>
               </div>
             </div>
           </div>
         </aside>
         <main className="main-area">
-          {!editor && errorNotice}
-          {recoveryNotice && (
-            <div className="recovery-notice" role="alert">
+          {error && (
+            <p className="notice error" role="alert">
+              {error}
+            </p>
+          )}
+          {recovered && (
+            <div className="notice recovery" role="alert">
               <p>
-                Eine automatische Sicherung wurde geladen, weil die letzte
-                Datendatei nicht lesbar war. Prüfe deine Aufgaben: Die jüngste
-                Änderung könnte fehlen.
+                Eine automatische Sicherung wurde geladen. Prüfe bitte deine
+                jüngsten Aufgaben.
               </p>
               <button
-                className="button button-quiet"
-                onClick={() => setRecoveryNotice(false)}
+                className="text-button"
+                onClick={() => setRecovered(false)}
               >
                 Verstanden
               </button>
             </div>
           )}
-          <fieldset className="interaction-group" disabled={busy}>
-            {view === "dashboard" && (
-              <Dashboard
+          <fieldset className="interaction-layer" disabled={busy}>
+            {view === "today" && (
+              <Today
                 data={data}
                 now={now}
-                onAddTask={addTask}
-                onEditTask={editTask}
-                onToggleTask={toggleTask}
-                onOpenSemester={() => navigate("semester")}
+                onAdd={() => {
+                  setNotice("");
+                  setEditor({ mode: "new" });
+                }}
+                onEdit={(task) => {
+                  setNotice("");
+                  setEditor({ mode: "edit", task });
+                }}
+                onToggle={toggle}
+                onAll={() => navigate("tasks")}
               />
             )}
-            {view === "semester" && (
-              <SemesterMate
+            {view === "tasks" && (
+              <Tasks
                 tasks={data.tasks}
-                onAddTask={addTask}
-                onEditTask={editTask}
-                onToggleTask={toggleTask}
+                now={now}
+                onAdd={() => {
+                  setNotice("");
+                  setEditor({ mode: "new" });
+                }}
+                onEdit={(task) => {
+                  setNotice("");
+                  setEditor({ mode: "edit", task });
+                }}
+                onToggle={toggle}
               />
             )}
             {view === "settings" && (
               <Settings
-                key={settingsRevision}
-                data={data}
-                onUpdateProfile={updateProfile}
-                onUpdateTheme={updateTheme}
-                onReset={resetData}
-                onImport={importBackup}
+                key={JSON.stringify(data.profile)}
+                saved={data.profile}
+                onSave={saveProfile}
                 onExport={exportBackup}
-                onDirty={onDirty}
+                onImport={importBackup}
+                onReset={reset}
+                onDirty={setDirty}
               />
             )}
           </fieldset>
@@ -451,42 +378,51 @@ export default function App() {
       </div>
       {editor && (
         <Modal
-          eyebrow="UniX"
           title={editor.mode === "edit" ? "Aufgabe bearbeiten" : "Neue Aufgabe"}
-          onClose={closeEditor}
           busy={busy}
+          onClose={() => {
+            if (confirmDiscard()) {
+              setEditor(undefined);
+              setDirty(false);
+            }
+          }}
         >
-          {errorNotice}
-          <fieldset className="interaction-group" disabled={busy}>
+          {error && (
+            <p className="notice error modal-error" role="alert">
+              {error}
+            </p>
+          )}
+          <fieldset className="interaction-layer" disabled={busy}>
             <TaskEditor
               task={editor.mode === "edit" ? editor.task : undefined}
-              onCancel={closeEditor}
-              onSave={saveTask}
-              onDirty={onDirty}
+              onSave={(draft) => void saveTask(draft)}
+              onCancel={() => {
+                if (confirmDiscard()) {
+                  setEditor(undefined);
+                  setDirty(false);
+                }
+              }}
+              onDelete={
+                editor.mode === "edit"
+                  ? () => void remove(editor.task)
+                  : undefined
+              }
+              onDirty={setDirty}
             />
-            {editor.mode === "edit" && (
-              <button
-                className="delete-task-button"
-                type="button"
-                onClick={() => void deleteTask(editor.task)}
-              >
-                Aufgabe löschen
-              </button>
-            )}
           </fieldset>
         </Modal>
       )}
-      {busy ? (
+      {busy && (
         <div className="toast" role="status">
-          <LoaderCircle className="spinner" size={16} /> Bitte warten …
+          <LoaderCircle className="spin" size={17} />
+          Bitte warten …
         </div>
-      ) : (
-        toast &&
-        !editor && (
-          <div className="toast" role="status">
-            <Check size={16} /> {toast}
-          </div>
-        )
+      )}
+      {notice && !busy && !editor && (
+        <div className="toast" role="status">
+          <Check size={17} />
+          {notice}
+        </div>
       )}
     </div>
   );

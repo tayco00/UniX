@@ -1,23 +1,24 @@
-import { Check, Circle, MoreHorizontal } from "lucide-react";
+import { Check, MoreHorizontal } from "lucide-react";
 import type { Task } from "../domain/model";
-import { formatDueLabel, taskTypeLabels } from "../domain/tasks";
+import { dueLabel, minutesLabel, taskTypeLabels } from "../domain/tasks";
 
 export function TaskRow({
   task,
   onToggle,
   onEdit,
+  now = new Date(),
 }: {
   task: Task;
   onToggle: () => void;
   onEdit: () => void;
+  now?: Date;
 }) {
-  const isOverdue =
+  const overdue =
     task.status === "open" &&
-    formatDueLabel(task.dueDate).includes("überfällig");
+    task.dueDate <
+      `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
   return (
-    <article
-      className={`task-row ${task.status === "done" ? "task-done" : ""}`}
-    >
+    <article className={`task-row ${task.status === "done" ? "done" : ""}`}>
       <button
         className="task-check"
         type="button"
@@ -28,34 +29,22 @@ export function TaskRow({
             : `${task.title} erledigen`
         }
       >
-        {task.status === "done" ? <Check size={16} /> : <Circle size={16} />}
+        {task.status === "done" && <Check size={15} />}
       </button>
-      <div className="task-main">
-        <h3>
-          <button
-            className="task-title-button"
-            type="button"
-            onClick={onEdit}
-            title={task.title}
-          >
-            {task.title}
-          </button>
-        </h3>
+      <div className="task-copy">
+        <button className="task-title" type="button" onClick={onEdit}>
+          {task.title}
+        </button>
         <p>
-          {task.module ? `${task.module} · ` : ""}
-          {taskTypeLabels[task.type]} ·{" "}
-          {task.estimateMinutes
-            ? `${task.estimateMinutes} Min.`
-            : "Aufwand offen"}
-          {task.priority === "high" ? " · Hohe Priorität" : ""}
-          {task.notes ? " · Mit Notiz" : ""}
+          {task.course || taskTypeLabels[task.type]}
+          <span>·</span>
+          {taskTypeLabels[task.type]}
+          <span>·</span>
+          {minutesLabel(task.estimateMinutes)}
         </p>
       </div>
-      <span
-        title={`Fällig am ${task.dueDate.split("-").reverse().join(".")}`}
-        className={`due-label ${isOverdue ? "overdue" : ""}`}
-      >
-        {task.status === "done" ? "Erledigt" : formatDueLabel(task.dueDate)}
+      <span className={`task-due ${overdue ? "overdue" : ""}`}>
+        {task.status === "done" ? "Erledigt" : dueLabel(task.dueDate, now)}
       </span>
       <button
         className="icon-button row-menu"
