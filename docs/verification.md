@@ -1,39 +1,71 @@
-# Prüfprotokoll
+# Verifikationsbericht
 
-Stand: 11. September 2026 · UniX 0.4.0
+Stand: 11. September 2026 · UniX 0.5.0
 
-Dieses Protokoll wird mit dem Release abgeschlossen. Es trennt schnelle Codeprüfungen von echten Desktop-Abläufen und dokumentiert bekannte Grenzen.
+## Ergebnis
 
-## Automatisierte Ebenen
+Der Release-Kandidat erfüllt den abgegrenzten Planungskern: Einrichtung, Module, Einträge, Priorisierung, Suche, Statuswechsel, Profil, Sicherung, Wiederherstellung und Neustart. Nicht implementierte Zukunftsmodule erscheinen nicht in der Oberfläche.
 
-| Ebene | Inhalt | Soll |
-| --- | --- | --- |
-| Typen | vollständige TypeScript-Prüfung ohne Ausgabe | bestanden |
-| Code-Regeln | UI-, Test-, Desktop- und Skriptdateien | bestanden |
-| Komponenten und Domäne | Ersteinrichtung, Aufgaben, Suche, Filter, Fehlerpfade, Migration, Speicherung | 47 Tests bestanden |
-| Quell-Desktop | echter Electron-Prozess mit isoliertem Datenordner | bestanden |
-| Paket-Desktop | identischer Ablauf mit der gebauten `UniX.exe` | bestanden |
-| Abnahmematrix | Anzahl, eindeutige IDs, zehn Kategorien und kein offener Status | 120/120 bestanden |
-| Abhängigkeiten | npm-Prüfung auf bekannte Schwachstellen | 0 bekannte Schwachstellen |
+## Automatisierte Nachweise
 
-## Geprüfter Desktop-Ablauf
+| Prüfung | Ergebnis |
+| --- | --- |
+| Dart-Format | ohne Abweichung |
+| Flutter-Analyse | ohne Befund |
+| Flutter Unit-, Daten- und Widgettests | 55 bestanden |
+| Desktop-Host-Tests | 5 bestanden |
+| Produkt-, Text-, Kontrast- und Dateigrößenregeln | bestanden |
+| npm-Sicherheitsaudit | 0 bekannte Schwachstellen |
+| Flutter-Web-Produktionsbuild | bestanden |
+| Quell-Smoke | bestanden; sichtbarer Flutter-Start nach 170 ms |
+| Paket-Smoke | bestanden; sichtbarer Flutter-Start nach 170 ms |
 
-Der native Ablauf richtet ein Profil ein, prüft den leeren Zustand, legt eine Aufgabe der Art Mensa/Cafétaria an, startet neu, bearbeitet die Aufgabe, erledigt und öffnet sie wieder, verwendet Suche und Filter, exportiert und importiert eine Sicherung, prüft den Schutz ungespeicherter Eingaben, lädt einen größeren Beispieldatensatz und setzt UniX zurück.
+Die Startmessung beginnt nach dem Laden des Hauptdokuments und endet, sobald die Flutter-Oberfläche im Fenster vorhanden ist. Sie ist ein reproduzierbarer Smoke-Messwert dieses PCs, kein allgemeines Leistungsversprechen.
 
-Zusätzlich werden Mindestfenstergröße, lange Titel, Tastaturfokus, Kontrastpaare, 200-%-Zoom, blockierte Navigation, verweigerte Berechtigungen, Einzelinstanz, Persistenz und reguläres Beenden geprüft. Screenshots werden während des Laufs erzeugt und visuell kontrolliert.
+## Sichtprüfung
 
-## Testgrenzen
+Die automatisch aufgenommenen Zustände wurden einzeln geprüft:
 
-- Der Installer ist nicht digital signiert; dadurch ist ein Windows-SmartScreen-Hinweis möglich.
-- Der automatisierte Lauf prüft Windows x64 auf dem Entwicklungs-PC. Andere Windows-Hardware und Hilfstechnologien benötigen zusätzlich reale Pilotnutzer.
-- Backup-Dialoge werden im nativen Test kontrolliert simuliert, damit keine beliebigen Nutzerdateien ausgewählt oder überschrieben werden.
-- CampusGig, Marketplace, StudyMatch und SemesterMate gehören nicht zu diesem Release und werden nicht vorgetäuscht.
-- Cloud, Accounts, Benachrichtigungen und Mehrgeräte-Konflikte sind nicht Teil dieses Meilensteins.
+- [Ersteinrichtung](screenshots/onboarding.png): klare Hierarchie, leere echte Eingaben, eindeutige Hauptaktion
+- [Desktop](screenshots/today-desktop.png): 1.440 × 900 px, vollständige Navigation und Fokusansicht
+- [Tablet](screenshots/today-tablet.png): 900 × 800 px, kompakte Navigation ohne abgeschnittene Aktionen
+- [Mobil](screenshots/today-mobile.png): 390 × 844 px, untere Navigation und einspaltige Bedienung
+- [200 Prozent](screenshots/zoom-200.png): weiterhin lesbar und vertikal bedienbar
 
-## Release-Nachweise
+Während der Widget- und Sichtprüfung wurden zwei reale Layoutprobleme gefunden und vor der Abnahme korrigiert: ein überlaufender Onboarding-Hinweis sowie verdeckte Ink-/Fokuseffekte der Modulliste.
 
-- Version und Tag: `0.4.0` / `v0.4.0`
-- Installer: `UniX-0.4.0-Setup.exe`
-- SHA-256: `c8ab3581ab1dc6b15410613b6d9d40b7ba4d1a678c7f4f9bb685ae0fde82149d`
-- Repository: <https://github.com/tayco00/UniX>
-- Release: <https://github.com/tayco00/UniX/releases/tag/v0.4.0>
+## Start und Stop
+
+Der entpackte Release wurde zweimal nacheinander gestartet. Die Zahl der vier zugehörigen Electron-Prozesse blieb beim zweiten Start unverändert; es entstand somit kein zweites App-Fenster. Anschließend beendete das Stopskript alle zugehörigen Prozesse. Ein zweiter Stop endete erwartungsgemäß erfolgreich. Die Desktop-Verknüpfung `C:\Users\tayla\Desktop\UniX.lnk` wurde separat gestartet und geprüft.
+
+## Artefakte
+
+| Artefakt | Größe |
+| --- | ---: |
+| Flutter-Web-Build | 42.199.401 Byte |
+| entpackte Windows-App | 427.502.792 Byte |
+| Windows-Installer | 122.193.857 Byte |
+
+SHA-256 des Installers:
+
+```text
+F03DEEDDE587EC84DDEC58A04E2BE0085B0F654C7F1EE872C8092991A1689C78  UniX-0.5.0-Setup.exe
+```
+
+## Reproduzierbarkeit
+
+- Flutter 3.47.3 stable
+- Dart 3.13.3
+- Node.js 24.14.1
+- npm 11.11.0
+- Windows 10.0.26200, x64
+- gesperrte Dart- und npm-Abhängigkeiten über `pubspec.lock` und `package-lock.json`
+
+## Bewusste Grenzen nach M1
+
+- Der Windows-Installer ist technisch geprüft, aber noch nicht mit einem kostenpflichtigen Herausgeberzertifikat signiert.
+- Der native Flutter-Windows-Runner benötigt die Visual-Studio-C++-Toolchain; bis dahin dient Electron als schmale Auslieferungshülle.
+- Der iOS-Runner und die App-Icons sind vorbereitet. Build, Signing und TestFlight benötigen macOS, Xcode und ein Apple-Entwicklerkonto.
+- Ein echter Pilot mit Studierenden und Hilfstechnologien ist Teil von M2 und wird nicht durch automatisierte Tests ersetzt.
+
+Diese Punkte verhindern nicht die Nutzung des aktuellen Windows-Planungskerns; sie sind die expliziten Gates der nächsten Etappe.

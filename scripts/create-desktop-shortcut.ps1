@@ -1,13 +1,11 @@
 $ErrorActionPreference = 'Stop'
 $projectPath = Split-Path -Parent $PSScriptRoot
-$exePath = Join-Path $projectPath 'release\win-unpacked\UniX.exe'
-if (-not (Test-Path -LiteralPath $exePath -PathType Leaf)) { throw 'Zuerst npm run pack ausfuehren.' }
+$target = Join-Path $projectPath 'Start UniX.cmd'
 $shortcutPath = Join-Path ([Environment]::GetFolderPath('Desktop')) 'UniX.lnk'
 $shell = New-Object -ComObject WScript.Shell
 $shortcut = $shell.CreateShortcut($shortcutPath)
-$shortcut.TargetPath = $exePath
-$shortcut.WorkingDirectory = Split-Path -Parent $exePath
-$shortcut.IconLocation = "$exePath,0"
-$shortcut.Description = 'UniX'
+$shortcut.TargetPath = $target
+$shortcut.WorkingDirectory = $projectPath
+$shortcut.IconLocation = (Join-Path $projectPath 'release\win-unpacked\UniX.exe')
 $shortcut.Save()
-Write-Host "Desktop-Verknuepfung erstellt: $shortcutPath"
+Write-Host "Desktop-Verknüpfung erstellt: $shortcutPath"

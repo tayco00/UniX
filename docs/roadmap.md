@@ -1,33 +1,41 @@
-# UniX – Meilensteine
+# Meilensteine
 
-Stand: 11. September 2026. Jeder Meilenstein beginnt erst nach Abschluss seines Vorgängers. Nicht gebaute Module erscheinen nicht in der App-Navigation.
+## M0 – Projektneustart
 
-## M0 – Neustart und Produktvertrag
+Status: abgeschlossen.
 
-Status: abgeschlossen. Das frühere lokale Projekt wurde entfernt, der Git-Verlauf aus dem bestehenden öffentlichen Repository neu geklont und Ruflo 3.41.2 projektbezogen initialisiert. Nutzerfeedback liegt sowohl in Ruflos lokalem Projektgedächtnis als auch in der Abnahmematrix. Produktname, Scope, Datenmigration, Architektur und helle Gestaltung sind festgelegt.
+Alter Projektordner wiederherstellbar entfernt, Repository ohne Altdateien ausgecheckt, Flutter- und Ruflo-Basis angelegt, Produktauftrag, Stakeholder, Architektur und Designprinzipien neu definiert.
 
-Gate: nachvollziehbare Ruflo-Integration, 120 Kriterien, keine globale oder Cloud-Konfiguration, alter Git-Stand wiederherstellbar.
+Gate: keine Altdatei übernommen; Plattformstrategie und Nicht-Ziele dokumentiert.
 
-## M1 – Nutzbarer Studienplaner
+## M1 – Verlässlicher Planungskern
 
-Status: abgeschlossen. Enthält Ersteinrichtung, Tagesfokus, Aufgaben mit fünf Arten einschließlich Mensa/Cafétaria, Filter, Suche, Profil, Sicherung, Wiederherstellung und Reset. Windows-App, Installer, Start/Stop und Migration der bisherigen UniX-Daten gehören zum Lieferumfang.
+Status: technisch abgeschlossen; Produktabnahme durch den Produktverantwortlichen offen.
 
-Gate: 120/120 Kriterien belegt, automatisierte Tests sowie native Probeläufe für Quell- und Paket-Build bestanden, GitHub-Release veröffentlicht.
+Ersteinrichtung, Module, Verpflichtungen, Tagesfokus, Planer, Suche, Status, Profil, Sicherung und Wiederherstellung. Adaptive UI für Desktop- und iPhone-Breiten.
 
-## M2 – CampusGig
+Gate: 156/156 Abnahmekriterien, automatisierte Fach- und Widgettests, visueller Review, Quell- und Paket-Smoketest.
 
-Status: geplant. Kleine bezahlte Hilfen zwischen verifizierten Studierenden. Vor Umsetzung werden Moderation, Missbrauchsmeldungen, Haftung, Identitätsprüfung und Zahlungsgrenzen mit Pilotnutzern validiert.
+## M2 – Pilot und native Plattformhüllen
 
-Gate: getesteter Problem-/Lösungsfit, Moderationskonzept, Datenschutz- und Sicherheitsprüfung.
+Status: geplant.
 
-## M3 – Marketplace
+Pilot mit Studierenden, Accessibility-Test mit Hilfstechnologien, Windows-Code-Signing, nativer Flutter-Windows-Runner und iOS-Build auf macOS/TestFlight.
 
-Status: geplant. Campusbezogene Angebote und Gesuche, erst nach belastbarer Identitäts- und Moderationsbasis aus M2.
+Gate: keine kritischen Pilotprobleme; signierte Builds; iPhone- und Windows-Abnahme.
 
-## M4 – StudyMatch
+## M3 – CampusGig
 
-Status: geplant. Lernpartner und Gruppen über Hochschule, Modul, Zeitraum und bevorzugte Lernform.
+Status: geplant. Problemvalidierung, Identität, Moderation, Meldung, Haftung und Zahlungsgrenzen vor Implementierung.
 
-## M5 – SemesterMate, Cloud und Mobile
+## M4 – Marketplace
 
-Status: geplant. Kalenderintegration, Benachrichtigungen und optionale Synchronisierung. Erst mit Account-, Konflikt- und Datenschutzkonzept. Mobile Clients teilen Domänenmodell und API-Verträge, nicht die Electron-Hülle.
+Status: geplant. Baut erst auf der in M3 geprüften Vertrauens- und Moderationsbasis auf.
+
+## M5 – StudyMatch
+
+Status: geplant. Matching nach Modul, Zeit und Lernform mit Sicherheits- und Blockierkonzept.
+
+## M6 – SemesterMate und Synchronisierung
+
+Status: geplant. Hochschulfristen, Kalender, Benachrichtigungen und Mehrgerätesynchronisierung mit Account-, Datenschutz- und Konfliktmodell.

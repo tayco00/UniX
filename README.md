@@ -1,85 +1,75 @@
 # UniX
 
-UniX ist eine Windows-Desktopanwendung, die Aufgaben, Fristen und Lernzeiten in einer ruhigen Studienübersicht bündelt. Der erste Meilenstein konzentriert sich bewusst auf einen verlässlichen Studienplaner. CampusGig, Marketplace, StudyMatch und SemesterMate folgen erst nach eigenen Produkt- und Sicherheitsprüfungen.
+UniX ist eine moderne Studienplanung für Windows und die spätere iOS-App. Der erste belastbare Produktkern verbindet persönliche Ersteinrichtung, Module, Prüfungen, Abgaben, Lernblöcke, Organisation und Mensa/Cafétaria mit einer klar priorisierten Tagesansicht.
 
-![UniX Tagesansicht](docs/screenshots/today.png)
+CampusGig, Marketplace, StudyMatch und SemesterMate sind bewusst noch nicht als Attrappen eingebaut. Sie folgen erst in eigenen, fachlich und sicherheitstechnisch geprüften Meilensteinen.
 
-## Aktueller Funktionsumfang
+![UniX](docs/screenshots/today-desktop.png)
 
-- kurze Ersteinrichtung mit Vorname, Hochschule, Studiengang und Semester (optional)
-- Tagesansicht mit genau einer hervorgehobenen nächsten Aufgabe
-- Aufgaben anlegen, bearbeiten, löschen, erledigen und wieder öffnen
-- Arten Prüfung, Abgabe, Lernblock, Organisation und Mensa/Cafétaria
-- verständliche Fälligkeiten, Prioritäten und Zeitschätzungen
-- Filter für offene, alle und erledigte Aufgaben sowie Volltextsuche
-- Profil bearbeiten, Sicherung exportieren, Sicherung wiederherstellen und neu beginnen
-- verständliche Leer-, Lade-, Fehler-, Speicher- und Wiederherstellungszustände
-- Übernahme des bisherigen UniX-Datenformats
+## Direkt verwenden
 
-Nicht enthalten sind Accounts, öffentliche Profile, Nachrichten, Zahlungen, CampusGig, Marketplace, StudyMatch, Kalender-Synchronisierung oder Cloud-Dienste. Diese Funktionen werden in späteren Meilensteinen nicht nur ergänzt, sondern jeweils vorab fachlich und sicherheitstechnisch validiert.
+1. `UniX-0.5.0-Setup.exe` aus dem [GitHub-Release](https://github.com/tayco00/UniX/releases) herunterladen.
+2. Installer öffnen und Zielordner wählen.
+3. UniX über die erstellte Desktop- oder Startmenü-Verknüpfung starten.
 
-## UniX verwenden
+Der aktuelle öffentliche Build ist noch nicht mit einem kostenpflichtigen Windows-Code-Signing-Zertifikat signiert. Windows kann deshalb einen SmartScreen-Hinweis anzeigen. Vor der Ausführung lässt sich die veröffentlichte SHA-256-Prüfsumme vergleichen.
 
-### Installer
+## Projekt einrichten
 
-1. `UniX-0.4.0-Setup.exe` aus dem aktuellen GitHub-Release herunterladen.
-2. Installer öffnen und den Schritten folgen.
-3. UniX über die Desktop- oder Startmenü-Verknüpfung starten.
-
-Der Installer ist noch nicht digital signiert. Windows kann deshalb einen SmartScreen-Hinweis anzeigen. Die veröffentlichte SHA-256-Prüfsumme erlaubt eine Integritätsprüfung.
-
-### Direkt aus diesem Projektordner
-
-Nach einem Build startet ein Doppelklick auf `Start UniX.cmd` die Anwendung. `Stop UniX.cmd` beendet ausschließlich diese Projektversion regulär und wartet auf laufende Speichervorgänge. Das normale Schließen des Fensters funktioniert ebenfalls.
-
-## Entwicklung einrichten
-
-Voraussetzungen: Windows 10 oder 11, Node.js 22 oder neuer und npm.
-
-Ein frischer Checkout benötigt genau diesen Installationsbefehl:
+Voraussetzung ist Node.js 22 oder neuer. Danach genügt unter Windows im Projektordner:
 
 ```powershell
-npm ci
+.\scripts\setup.ps1
 ```
 
-Entwicklungsmodus starten:
+Alternativ kann `Setup UniX.cmd` doppelt angeklickt werden. Das Setup lädt Flutter 3.47.3 in den benachbarten Ordner `Ideen\.tooling`, installiert exakt gesperrte npm-Pakete, löst Dart-Pakete auf und erzeugt die App-Icons. Die portable Flutter-Installation bleibt außerhalb des Git-Repositories.
+
+## Start und Stop
+
+Nach einem Paket-Build:
 
 ```powershell
-npm run dev
+.\Start UniX.cmd
+.\Stop UniX.cmd
 ```
 
-Mit `Ctrl+C` im geöffneten Terminal wird der Entwicklungsmodus beendet.
+`Start UniX.cmd` öffnet ausschließlich `release\win-unpacked\UniX.exe`. `Stop UniX.cmd` beendet ausschließlich genau diesen Build und kann gefahrlos erneut ausgeführt werden. Bei ungespeicherten Eingaben fragt UniX nach; eine laufende Speicherung wird vor dem Beenden abgewartet.
 
-## Tests und Qualitätsprüfung
+Für eine Desktop-Verknüpfung:
 
 ```powershell
+.\scripts\create-desktop-shortcut.ps1
+```
+
+Während der Entwicklung startet `npm run dev` Flutter und den Desktop-Host gemeinsam. Beenden erfolgt dort mit `Strg+C` im Terminal.
+
+## Qualität und Tests
+
+```powershell
+npm run format:check
+npm run analyze
+npm run test:dart
+npm run test:host
+npm run test:product
+npm run test:desktop
+npm run audit
 npm run quality
 ```
 
-Der Befehl prüft TypeScript, Code-Regeln, automatisierte Tests und alle 120 internen Abnahmekriterien. Ergänzend stehen echte Desktop-Abläufe zur Verfügung:
+`npm run test:dart` verwendet kurzzeitig einen pfadneutralen Laufwerksalias. Das umgeht einen Fehler des Flutter-Teststarters bei Apostrophen im ausdrücklich gewünschten Projektpfad; der Alias wird nach dem Lauf immer entfernt.
+
+Die interne Abnahme umfasst 156 konkrete Kriterien in 13 Kategorien. Sie stehen in [docs/acceptance-criteria.md](docs/acceptance-criteria.md). `npm run quality` wird erst grün, wenn alle Nachweise erbracht und die Kriterien als erfüllt dokumentiert sind.
+
+## Build
+
+Flutter-Produktionsoberfläche und entpackte Windows-App:
 
 ```powershell
-npm run build:web
-npm run test:desktop
-```
-
-Nach einem Paket-Build prüft derselbe Ablauf die gebaute Windows-Anwendung:
-
-```powershell
-npm run test:packaged
-```
-
-Die Desktop-Prüfung arbeitet in einem isolierten Testordner. Sie verändert keine persönlichen UniX-Daten.
-
-## Windows-Build
-
-Entpackte, direkt startbare Anwendung erzeugen:
-
-```powershell
+npm run build:flutter
 npm run pack
 ```
 
-Installer erzeugen:
+Installer:
 
 ```powershell
 npm run build
@@ -87,46 +77,36 @@ npm run build
 
 Ergebnisse:
 
-- `release/win-unpacked/UniX.exe`
-- `release/UniX-0.4.0-Setup.exe`
+- `release\win-unpacked\UniX.exe` – direkt startbare Anwendung
+- `release\UniX-0.5.0-Setup.exe` – Windows-Installer
 
-Node.js und Ruflo werden auf dem Ziel-PC nicht benötigt.
+Der native Flutter-Windows-Runner liegt bereits unter `windows/`. Für seinen Build fehlen auf dem aktuellen Rechner die Visual-Studio-C++-Werkzeuge. Deshalb kapselt Version 0.5.0 denselben Flutter-Produktionsbuild in einem kleinen, gehärteten Electron-Host. Produktlogik und UI bleiben vollständig in Flutter/Dart und damit für iOS wiederverwendbar.
 
-## Daten und Sicherungen
+Ein iOS-Build benötigt später macOS, Xcode, ein Apple-Entwicklerkonto sowie Signing. Der vorbereitete Runner liegt unter `ios/`.
 
-UniX speichert ein versioniertes Datenmodell im Windows-Anwendungsdatenverzeichnis. Schreibvorgänge sind serialisiert und atomar; vor dem Überschreiben entsteht eine automatische Sicherung. Zusätzlich kann in den Einstellungen eine frei wählbare JSON-Sicherung exportiert und später wiederhergestellt werden.
+## Architektur
 
-Altdaten aus UniX Version 1 werden beim Lesen in Version 2 überführt. App-ID und Windows-Datenverzeichnis wurden dafür beibehalten.
+- Flutter/Dart: gemeinsame Produktlogik, UI und Tests für Windows und später iOS
+- Repository-Vertrag: austauschbare Datenhaltung ohne Kopplung der Fachlogik
+- versioniertes JSON-Schema: validierbare Sicherung und spätere Migration
+- Local-First: der Produktbetrieb benötigt keine externe API; eine spätere Synchronisierung wird als eigener Kontext ergänzt
+- Electron: vorübergehende Windows-Auslieferungshülle ohne Produktregeln
+- Ruflo: nur projektbezogene Entwicklungsregeln, keine Produkt- oder Release-Abhängigkeit
 
-## Technik
+Entscheidungen und Grenzen sind in [Produktauftrag](docs/product-charter.md), [Stakeholderregister](docs/stakeholders.md), [Architektur](docs/architecture.md) und [Designsystem](docs/design-system.md) festgehalten.
 
-- Electron für den eigenständigen Windows-Prozess und das Packaging
-- React und TypeScript für eine wartbare, testbare UI
-- Vite für schnelle Entwicklungs- und Produktions-Builds
-- Zod für die Validierung an Daten- und Importgrenzen
-- Electron Builder für entpackte Builds und den NSIS-Installer
+## Daten und Wiederherstellung
 
-Die UI, Domänenlogik, Speichergrenze und Desktop-Brücke sind getrennt. Dadurch kann das aktuelle Dateirepository später gegen SQLite oder einen Synchronisierungsadapter ausgetauscht werden, ohne die Fachlogik neu zu schreiben. Mobile Clients können das Domänenmodell und die API-Verträge übernehmen, während die Electron-Hülle Windows-spezifisch bleibt.
-
-Ruflo 3.41.2 ist ausschließlich als projektbezogener Entwicklungs- und Prüfharness eingerichtet. Die Anwendung hängt zur Laufzeit nicht davon ab.
-
-## Dokumentation
-
-- [120 Abnahmekriterien](docs/acceptance-criteria.md)
-- [Architekturentscheidung](docs/architecture.md)
-- [Gestaltungsgrundlagen](docs/design.md)
-- [Prüfprotokoll](docs/verification.md)
-- [Meilensteine und Roadmap](docs/roadmap.md)
+UniX verwendet das neue Schema `1` und den neuen Schlüssel `app.unix.workspace.v1`. Daten früherer Versionen werden weder gelesen noch überschrieben. Unter Einstellungen kann eine vollständige JSON-Sicherung exportiert, vor dem Import vollständig validiert und nach Bestätigung wiederhergestellt werden.
 
 ## Roadmap
 
-| Meilenstein | Inhalt | Status |
-| --- | --- | --- |
-| M0 | Neustart, Feedbackvertrag und Ruflo-Integration | abgeschlossen |
-| M1 | Studienplaner, Windows-App, Datenmigration und Release | abgeschlossen |
-| M2 | CampusGig mit Verifikation und Moderation | geplant |
-| M3 | Marketplace auf derselben Vertrauensbasis | geplant |
-| M4 | StudyMatch | geplant |
-| M5 | SemesterMate, Synchronisierung und mobile Clients | geplant |
+- M0: Projektneustart, Produktauftrag, Stakeholder, Architektur und Designsystem
+- M1: verlässlicher Planungskern und Windows-Pilot
+- M2: Nutzerpilot, Accessibility-Audit, nativer Windows-Build und iOS/TestFlight
+- M3: CampusGig nach Identitäts-, Moderations- und Haftungskonzept
+- M4: Marketplace auf derselben Vertrauensbasis
+- M5: StudyMatch mit Matching- und Sicherheitskonzept
+- M6: SemesterMate, Kalender und Synchronisierung bei Bedarf
 
-Details und Gates stehen in [docs/roadmap.md](docs/roadmap.md).
+Die vollständigen Gates stehen in [docs/roadmap.md](docs/roadmap.md).

@@ -1,20 +1,17 @@
 # UniX
 
-> UniX with a project-scoped Ruflo workflow
+> A Claude Flow powered project
 
 ## Quick Start
 
 ### Setup
 ```bash
-npm ci
-npm run quality
-npm run build
+npm install && npm run build
 ```
 
 ### Test
 ```bash
-npm run test:run
-npm run test:desktop
+npm test
 ```
 
 ## Agent Behavior
