@@ -16,26 +16,33 @@ Ersteinrichtung, Module, Verpflichtungen, Tagesfokus, Planer, Suche, Status, Pro
 
 Gate: 156/156 Abnahmekriterien, automatisierte Fach- und Widgettests, visueller Review, Quell- und Paket-Smoketest.
 
-## M2 – Pilot und native Plattformhüllen
+## M2 – Gemeinsames Plattformfundament
 
-Status: geplant.
+Status: begonnen; M2.1 abgeschlossen.
 
-Pilot mit Studierenden, Accessibility-Test mit Hilfstechnologien, Windows-Code-Signing, nativer Flutter-Windows-Runner und iOS-Build auf macOS/TestFlight.
+M2 wird in sechs überprüfbare Teile gegliedert:
 
-Gate: keine kritischen Pilotprobleme; signierte Builds; iPhone- und Windows-Abnahme.
+- M2.1: Plattformvertrag, Datenhoheit, Stakeholder, Identitäts- und Safety-Domain sowie Bedrohungsmodell – abgeschlossen.
+- M2.2: Konto, Sitzung und Hochschulverifikation.
+- M2.3: Community-Profil, Sichtbarkeit, Blockieren und Melden.
+- M2.4: gemeinsames Postfach und Benachrichtigungen.
+- M2.5: Moderationsbetrieb, Support und geschlossener Studierendenpilot.
+- M2.6: Accessibility-Test mit Hilfstechnologien, Windows-Code-Signing, nativer Flutter-Windows-Runner und iOS/TestFlight.
+
+Gate: 130/130 [M2-Kriterien](m2-acceptance-criteria.md), getrennte Freigaben von Produkt, Qualität, Datenschutz, Security und Trust & Safety sowie keine kritischen Pilotprobleme.
 
 ## M3 – CampusGig
 
-Status: geplant. Problemvalidierung, Identität, Moderation, Meldung, Haftung und Zahlungsgrenzen vor Implementierung.
+Status: geplant. Kleine studentische Aufträge mit Suche, Bewerbung, Vergabe und Abschluss. Start erst nach bestandenem M2-Gate und Problemvalidierung; keine integrierte Zahlung im ersten Pilot.
 
 ## M4 – Marketplace
 
-Status: geplant. Baut erst auf der in M3 geprüften Vertrauens- und Moderationsbasis auf.
+Status: geplant. Baut auf Identität, Postfach und der in M3 geprüften Vertrauens- und Moderationsbasis auf. Zunächst ohne integrierte Bezahlung.
 
 ## M5 – StudyMatch
 
-Status: geplant. Matching nach Modul, Zeit und Lernform mit Sicherheits- und Blockierkonzept.
+Status: geplant. Matching nach Hochschule, Modul, Lernziel, Zeit und Lernform mit Gruppen-, Sicherheits- und Blockierkonzept.
 
-## M6 – SemesterMate und Synchronisierung
+## M6 – Studienplanung und SemesterMate ausbauen
 
-Status: geplant. Hochschulfristen, Kalender, Benachrichtigungen und Mehrgerätesynchronisierung mit Account-, Datenschutz- und Konfliktmodell.
+Status: geplant. Wiederkehrende Aufgaben, Hochschulfristen, Kalenderimport, Erinnerungen und Mehrgerätesynchronisierung mit Datenschutz- und Konfliktmodell.

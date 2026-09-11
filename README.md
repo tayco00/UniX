@@ -2,7 +2,7 @@
 
 UniX ist eine moderne Studienplanung für Windows und die spätere iOS-App. Der erste belastbare Produktkern verbindet persönliche Ersteinrichtung, Module, Prüfungen, Abgaben, Lernblöcke, Organisation und Mensa/Cafétaria mit einer klar priorisierten Tagesansicht.
 
-CampusGig, Marketplace, StudyMatch und SemesterMate sind bewusst noch nicht als Attrappen eingebaut. Sie folgen erst in eigenen, fachlich und sicherheitstechnisch geprüften Meilensteinen.
+CampusGig, Marketplace, StudyMatch und SemesterMate sind bewusst noch nicht als Attrappen eingebaut. M2 schafft dafür gerade die gemeinsame Identitäts-, Hochschul-, Kommunikations- und Sicherheitsbasis; sichtbar werden neue Bereiche erst als vollständige Nutzerabläufe.
 
 ![UniX](docs/screenshots/today-desktop.png)
 
@@ -58,7 +58,7 @@ npm run quality
 
 `npm run test:dart` verwendet kurzzeitig einen pfadneutralen Laufwerksalias. Das umgeht einen Fehler des Flutter-Teststarters bei Apostrophen im ausdrücklich gewünschten Projektpfad; der Alias wird nach dem Lauf immer entfernt.
 
-Die interne Abnahme umfasst 156 konkrete Kriterien in 13 Kategorien. Sie stehen in [docs/acceptance-criteria.md](docs/acceptance-criteria.md). `npm run quality` wird erst grün, wenn alle Nachweise erbracht und die Kriterien als erfüllt dokumentiert sind.
+Die Abnahme des veröffentlichten Planungskerns umfasst 156 erfüllte Kriterien in 13 Kategorien. Sie stehen in [docs/acceptance-criteria.md](docs/acceptance-criteria.md). Für das begonnene Plattformfundament werden zusätzlich 130 Kriterien in [docs/m2-acceptance-criteria.md](docs/m2-acceptance-criteria.md) verfolgt. `npm run quality` prüft sowohl den abgeschlossenen Release als auch Vollständigkeit und belegten Fortschritt des M2-Plans.
 
 ## Build
 
@@ -89,11 +89,12 @@ Ein iOS-Build benötigt später macOS, Xcode, ein Apple-Entwicklerkonto sowie Si
 - Flutter/Dart: gemeinsame Produktlogik, UI und Tests für Windows und später iOS
 - Repository-Vertrag: austauschbare Datenhaltung ohne Kopplung der Fachlogik
 - versioniertes JSON-Schema: validierbare Sicherung und spätere Migration
-- Local-First: der Produktbetrieb benötigt keine externe API; eine spätere Synchronisierung wird als eigener Kontext ergänzt
+- persönliche Planung: bleibt unabhängig von Plattform- oder Netzwerkfehlern nutzbar
+- Community-Daten: später über versionierte Serververträge, PostgreSQL, Cache, Revisionen und Idempotenz
 - Electron: vorübergehende Windows-Auslieferungshülle ohne Produktregeln
 - Ruflo: nur projektbezogene Entwicklungsregeln, keine Produkt- oder Release-Abhängigkeit
 
-Entscheidungen und Grenzen sind in [Produktauftrag](docs/product-charter.md), [Stakeholderregister](docs/stakeholders.md), [Architektur](docs/architecture.md) und [Designsystem](docs/design-system.md) festgehalten.
+Entscheidungen und Grenzen sind in [Produktauftrag](docs/product-charter.md), [Stakeholderregister](docs/stakeholders.md), [Architektur](docs/architecture.md), [Plattformfundament](docs/platform-foundation.md), [Bedrohungsmodell](docs/threat-model.md) und [Designsystem](docs/design-system.md) festgehalten.
 
 ## Daten und Wiederherstellung
 
@@ -103,7 +104,7 @@ UniX verwendet das neue Schema `1` und den neuen Schlüssel `app.unix.workspace.
 
 - M0: Projektneustart, Produktauftrag, Stakeholder, Architektur und Designsystem
 - M1: verlässlicher Planungskern und Windows-Pilot
-- M2: Nutzerpilot, Accessibility-Audit, nativer Windows-Build und iOS/TestFlight
+- M2: Konto, Hochschulverifikation, Community-Profil, Postfach, Safety, Pilot und native Plattformhüllen
 - M3: CampusGig nach Identitäts-, Moderations- und Haftungskonzept
 - M4: Marketplace auf derselben Vertrauensbasis
 - M5: StudyMatch mit Matching- und Sicherheitskonzept

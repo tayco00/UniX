@@ -10,6 +10,8 @@ Studierende verteilen Aufgaben, Fristen, Lernblöcke und organisatorische Termin
 
 UniX zeigt einer studierenden Person, was als Nächstes wichtig ist, warum es wichtig ist und wann dafür Zeit eingeplant wurde. Die Oberfläche bleibt ruhig, konkret und ohne künstliche Aktivität.
 
+Langfristig verbindet UniX Studienplanung, studentische Hilfe, Handel und Lerngruppen in einer Anwendung. „All-in-One“ bedeutet dabei gemeinsame Identität, Navigation, Suche, Kommunikation und Sicherheitsregeln – nicht eine ungegliederte Sammlung von Funktionen.
+
 ## Zielgruppe
 
 Primär sind es deutschsprachige Studierende an Hochschulen und Universitäten, die mehrere Module, Abgaben, Prüfungen und Selbstlernzeiten koordinieren. Die erste Version ist für eine einzelne Person auf Windows ausgelegt. Die Produktlogik und UI werden bereits mit kompakten iPhone-Breiten geprüft.
@@ -29,6 +31,8 @@ Primär sind es deutschsprachige Studierende an Hochschulen und Universitäten, 
 ## Bewusste Nicht-Ziele
 
 CampusGig, Marketplace, StudyMatch, SemesterMate-Automatisierung, Chat, Zahlungen, öffentliche Profile, Accounts, Cloud-Synchronisierung und externe Hochschul-APIs sind nicht Teil des ersten Releases. Nicht gebaute Funktionen erscheinen nicht als Attrappen in der Navigation.
+
+Ab M2 werden Konten und Community-Grundlagen schrittweise entwickelt. Integrierte Bezahlung, globale öffentliche Profile, professionelle Arbeitgeberangebote und unmoderierte Kommunikation bleiben zunächst außerhalb des Umfangs.
 
 ## Erfolgsdefinition
 
